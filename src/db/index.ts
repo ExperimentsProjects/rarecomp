@@ -1,24 +1,49 @@
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
-const databaseUrl = process.env.DATABASE_URL;
-
-if (!databaseUrl) {
-  throw new Error("DATABASE_URL is required");
-}
+/**
+ * Lazy, build-safe database client.
+ *
+ * Next.js imports every route/module while collecting page data at BUILD time,
+ * when DATABASE_URL is not present yet. Connecting eagerly at import would crash
+ * the build. This defers the connection until the first actual query at runtime.
+ */
 
 const globalForDb = globalThis as typeof globalThis & {
-  __arenaNextJsPostgresqlPool?: Pool;
+  __epPgPool?: Pool;
+  __epPgDb?: NodePgDatabase;
 };
 
-export const pool =
-  globalForDb.__arenaNextJsPostgresqlPool ??
-  new Pool({
-    connectionString: databaseUrl,
-  });
+function resolveDb(): NodePgDatabase {
+  if (globalForDb.__epPgDb) return globalForDb.__epPgDb;
 
-if (process.env.NODE_ENV !== "production") {
-  globalForDb.__arenaNextJsPostgresqlPool = pool;
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error(
+      "DATABASE_URL is not configured. Add your hosted PostgreSQL connection string (Neon/Supabase/Railway) to the environment variables, then redeploy.",
+    );
+  }
+
+  const needsSsl = !/localhost|127\.0\.0\.1/.test(databaseUrl);
+  globalForDb.__epPgPool = new Pool({
+    connectionString: databaseUrl,
+    ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
+    max: 10,
+  });
+  globalForDb.__epPgDb = drizzle(globalForDb.__epPgPool);
+  return globalForDb.__epPgDb;
 }
 
-export const db = drizzle(pool);
+export const pool = globalForDb.__epPgPool;
+
+/**
+ * Proxy binding every call to the lazily-resolved client, preserving `this`.
+ * Behavior is identical to a genuine Drizzle client for all queries.
+ */
+export const db = new Proxy({} as NodePgDatabase, {
+  get(_target, prop: string | symbol) {
+    const real = resolveDb() as unknown as Record<string | symbol, unknown>;
+    const value = real[prop];
+    return typeof value === "function" ? (value as (...args: unknown[]) => unknown).bind(real) : value;
+  },
+});
