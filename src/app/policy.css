@@ -1,0 +1,69 @@
+/* ===== Policy pages: contact, shipping & refunds, privacy ===== */
+.policy-page{min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#a7d1670d,transparent 55%),#101411}
+.standalone-header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:24px 34px;max-width:1180px;margin:auto;flex-wrap:wrap}
+.policy-nav-links{display:flex;gap:16px;font-size:11px}
+.policy-nav-links a{color:#8ba374;padding-bottom:3px;border-bottom:1px solid transparent}
+.policy-nav-links a:hover{color:#cde5ad}
+.policy-nav-links a.active{color:var(--lime);border-color:var(--lime)}
+.policy-card{max-width:880px;margin:22px auto 10px;padding:38px 44px;border:1px solid #3b4d2f;border-radius:16px;background:linear-gradient(135deg#1a2315,#15200f);background:linear-gradient(135deg,#1a2315,#15200f);box-shadow:0 24px 70px #0005}
+.policy-card h1{font-family:'Manrope',Arial,sans-serif;font-size:34px;letter-spacing:-1.2px;font-weight:650;margin:12px 0 8px;line-height:1.15}
+.policy-updated{font-size:10px;color:#7c9568;margin-bottom:22px}
+.policy-lead{font-size:13px;line-height:1.95;color:#a7bd92;margin-bottom:26px;padding-bottom:22px;border-bottom:1px solid #364a29}
+.policy-lead b,.policy-lead strong{color:#d3e9bc}
+.contact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:8px 0 20px}
+.contact-tile{border:1px solid #3d5330;background:#bfe38d06;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:7px}
+.contact-tile>span{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:#d1f87612;border:1px solid #70924f;color:var(--lime);margin-bottom:6px}
+.contact-tile b{font-size:12px;color:#d6e9c1}
+.contact-tile a,.contact-tile .text-link{font-size:11px;color:#a9c98b;word-break:break-word;display:inline-flex;align-items:center;gap:5px;width:fit-content}
+.contact-tile a:hover,.contact-tile .text-link:hover{color:var(--lime)}
+.contact-tile small{font-size:9px;color:#7d986a;margin-top:2px;line-height:1.6}
+.policy-note{font-size:11.5px;color:#9bb485;background:#bfe38d09;border:1px solid #475e35;border-radius:11px;padding:15px 18px;line-height:1.85}
+.policy-note b{color:#d3e9bc}
+
+.policy-list{display:flex;flex-direction:column;gap:2px}
+.policy-list>div{display:flex;gap:15px;padding:19px 4px;border-bottom:1px solid #314524}
+.policy-list>div:last-child{border:0}
+.policy-list>div>svg{color:var(--lime);flex-shrink:0;margin-top:4px}
+.policy-list h3{font-size:14.5px;color:#dcefc9;font-weight:600;margin-bottom:9px;letter-spacing:-.2px}
+.policy-list p{font-size:12.5px;line-height:1.95;color:#9db588}
+.policy-list p b,.policy-list p strong{color:#cfe6b4;font-weight:600}
+.policy-list p a{color:#a9d37a}
+.policy-list p a:hover{text-decoration:underline}
+.policy-sub{margin-top:11px;padding-top:11px;border-top:1px dashed #3c5030 !important}
+
+/* refund timeline table */
+.refund-table{width:100%;border-collapse:collapse;margin:14px 0 4px;font-size:11.5px;border:1px solid #3c5230;border-radius:9px;overflow:hidden}
+.refund-table th{background:#1a2612;color:#a8c48c;font-size:9px;letter-spacing:.9px;text-transform:uppercase;text-align:left;padding:11px 14px;font-weight:600}
+.refund-table td{padding:11px 14px;border-top:1px solid #33482a;color:#b6cfa0}
+.refund-table td:last-child{color:#d3e9bc;font-weight:600;white-space:nowrap}
+.refund-table tbody tr:hover td{background:#bfe38d08}
+
+.policy-foot{display:flex;gap:11px;flex-wrap:wrap;margin-top:28px;padding-top:24px;border-top:1px solid #364a29}
+.policy-foot .button{min-height:39px;font-size:11px;padding:10px 15px}
+.standalone-footnote{text-align:center;color:#728167;font-size:10px;padding:26px 20px 40px;line-height:1.8}
+
+@media(max-width:1000px){
+  .contact-grid{grid-template-columns:1fr 1fr}
+  .policy-card{padding:30px 28px}
+  .standalone-header{padding:22px 24px}
+}
+@media(max-width:700px){
+  .standalone-header{padding:20px 18px;gap:12px}
+  .policy-nav-links{order:3;width:100%;gap:14px;font-size:10px}
+  .policy-card{padding:24px 20px;margin:18px 14px 10px;border-radius:13px}
+  .policy-card h1{font-size:27px;letter-spacing:-.8px}
+  .contact-grid{grid-template-columns:1fr}
+  .policy-list>div{gap:12px;padding:17px 0}
+  .policy-list h3{font-size:13.5px}
+  .policy-list p{font-size:12px}
+  .refund-table{font-size:11px}
+  .refund-table th,.refund-table td{padding:9px 10px}
+  .refund-table td:last-child{white-space:normal}
+  .policy-foot{flex-direction:column}
+  .policy-foot .button{width:100%}
+}
+@media(max-width:420px){
+  .policy-card{padding:22px 16px;margin:16px 11px 10px}
+  .policy-card h1{font-size:24px}
+  .contact-tile{padding:15px}
+}

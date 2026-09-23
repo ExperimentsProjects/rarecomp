@@ -1,0 +1,61 @@
+/* ===== Physical hardware component visuals (PCB / module / antenna) ===== */
+.hardware-preview{position:relative;height:100%;min-height:184px;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 30%,#3d4a33 0%,#1a2118 55%,#121711 100%);overflow:hidden}
+.hardware-preview::after{content:"";position:absolute;inset:0;background-image:linear-gradient(#ffffff05 1px,transparent 1px),linear-gradient(90deg,#ffffff05 1px,transparent 1px);background-size:14px 14px;pointer-events:none}
+.hw-visual{position:relative;display:grid;place-items:center;isolation:isolate}
+
+/* dev board */
+.hw-board{width:132px;height:196px}
+.hw-visual .hw-pins{position:absolute;left:0;right:0;display:flex;justify-content:space-between;padding:0 3px}
+.hw-visual .hw-pins i{width:6px;height:7px;background:linear-gradient(#e8d98a,#b89b3e);border-radius:1px;box-shadow:0 1px 1px #0006}
+.hw-visual .hw-pins.hw-top{top:58px}
+.hw-visual .hw-pins.hw-bot{bottom:40px}
+.hw-board .hw-pins.hw-top,.hw-board .hw-pins.hw-bot{left:6px;right:6px}
+.hw-board .hw-shield{position:absolute;left:12px;right:12px;top:18px;height:46px;background:linear-gradient(150deg,#c9cdd1,#8e949b 45%,#b3b8bd);border-radius:4px;box-shadow:inset 0 1px 0 #fff8,0 2px 5px #0007;display:grid;place-items:center}
+.hw-board .hw-shield b{font-size:7px;letter-spacing:.6px;color:#3f464d;font-weight:700}
+.hw-board .hw-shield i{position:absolute;right:5px;bottom:4px;width:12px;height:8px;background:#00000018;border-radius:1px}
+.hw-board .hw-usb{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:26px;height:11px;background:linear-gradient(#dfe3e7,#a9afb5);border-radius:2px 2px 0 0}
+.hw-board .hw-ant-trace{position:absolute;top:0;left:12px;right:12px;height:14px;background:repeating-linear-gradient(90deg,#c8b26a 0 2px,transparent 2px 5px);opacity:.5}
+.hw-board .hw-chip{position:absolute;left:34px;bottom:66px;width:26px;height:12px;background:linear-gradient(#2c2f33,#1b1d20);border-radius:2px;box-shadow:0 1px 2px #0008}
+.hw-board .hw-led{position:absolute;right:22px;bottom:70px;width:5px;height:5px;border-radius:50%;background:#7ef58a;box-shadow:0 0 6px #7ef58a}
+.hw-board .hw-caption{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:6px;letter-spacing:1px;color:#9db386}
+
+/* small RF module */
+.hw-module{width:118px;height:150px}
+.hw-module .hw-pins.hw-top{top:6px;left:26px;right:26px}
+.hw-module .hw-pins.hw-bot{bottom:6px;left:26px;right:26px}
+.hw-module .hw-shield{position:absolute;left:10px;right:10px;top:34px;bottom:44px;background:linear-gradient(150deg,#c9cdd1,#8e949b 45%,#b3b8bd);border-radius:3px;box-shadow:inset 0 1px 0 #fff8,0 2px 6px #0008;display:grid;place-items:center}
+.hw-module .hw-shield b{font-size:8px;letter-spacing:1.4px;color:#3f464d;font-weight:800}
+.hw-module .hw-shield i{position:absolute;right:4px;bottom:4px;width:9px;height:6px;background:#00000018;border-radius:1px}
+.hw-module .hw-coil{position:absolute;top:12px;right:20px;width:16px;height:22px;border:2.5px solid #c8a24a;border-radius:50%;box-shadow:0 0 4px #c8a24a33}
+.hw-module .hw-crystal{position:absolute;left:14px;bottom:30px;width:11px;height:7px;background:linear-gradient(#c9cdd1,#8e949b);border-radius:1px}
+.hw-module .hw-caption{position:absolute;bottom:24px;left:0;right:0;text-align:center;font-size:6px;letter-spacing:1px;color:#9db386}
+
+/* antenna */
+.hw-antenna{width:110px;height:168px}
+.hw-antenna .hw-whip{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:11px;height:96px;background:linear-gradient(#26292c,#141618);border-radius:6px}
+.hw-antenna .hw-whip b{position:absolute;top:4px;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:#d1f876}
+.hw-antenna .hw-whip span{position:absolute;left:-1px;width:13px;height:3px;background:#2f3337;border-radius:2px}
+.hw-antenna .hw-whip span:nth-child(2){top:26px}
+.hw-antenna .hw-whip span:nth-child(3){top:48px}
+.hw-antenna .hw-whip span:nth-child(4){top:70px}
+.hw-antenna .hw-whip span:nth-child(5){top:86px}
+.hw-antenna .hw-sma{position:absolute;top:100px;left:50%;transform:translateX(-50%);width:26px;height:22px;background:linear-gradient(#d7dbdf,#9aa0a6);border-radius:3px;box-shadow:0 2px 5px #0007}
+.hw-antenna .hw-sma i{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:12px;height:5px;background:#7d838a;border-radius:1px}
+.hw-antenna small{position:absolute;bottom:16px;left:0;right:0;text-align:center;font-size:6px;letter-spacing:1px;color:#9db386}
+
+/* kit */
+.hw-kit{width:150px;height:150px;display:grid;grid-template-columns:1fr 1fr;gap:9px;align-content:center}
+.hw-kit .hw-piece{position:relative;height:58px;border-radius:5px;border:1px solid #4a5a3e;background:linear-gradient(150deg,#26301f,#1a2116);display:grid;place-items:center;box-shadow:0 3px 8px #0006}
+.hw-kit .hw-piece i{width:26px;height:15px;background:linear-gradient(150deg,#c9cdd1,#8e949b);border-radius:2px;box-shadow:0 1px 3px #0007}
+.hw-kit .hw-piece small{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:6px;letter-spacing:1.2px;color:#9db386}
+.hw-kit .hw-piece.hw-a{grid-row:span 2;height:auto}
+.hw-kit .hw-brace{grid-column:1/-1;text-align:center;font-size:6px;letter-spacing:1.2px;color:#b9d29a;margin-top:2px}
+
+/* shipping hint pill shown where a download button would be for digital goods */
+.ship-hint-pill{display:inline-flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.3px;color:#a9c98b;background:#bfe38d0d;border:1px solid #4f6a3b;border-radius:20px;padding:5px 10px;white-space:nowrap}
+.ship-hint-pill svg{width:11px;height:11px;color:var(--lime);flex-shrink:0}
+.detail-actions .ship-hint-pill{padding:9px 14px;font-size:10px}
+
+/* thumbnails inside scaled containers */
+.cart-thumb .hardware-preview,.table-thumb .hardware-preview,.search-thumb .hardware-preview,.admin-product-preview .hardware-preview{min-height:184px}
+.detail-visual .hardware-preview{min-height:350px}

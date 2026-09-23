@@ -1,0 +1,95 @@
+/* === 3D scene — MERN orb & electronics lab canvas === */
+.scene3d{position:relative;height:520px;perspective:1400px;user-select:none;--tiltx:0deg;--tilty:0deg;overflow:clip;overflow-clip-margin:30px}
+.scene3d.grid{--grid:repeating-linear-gradient(0deg,transparent 0 57px,#d1f87613 58px),repeating-linear-gradient(90deg,transparent 0 57px,#d1f87613 58px)}
+.scene-grid3d{position:absolute;inset:-60px;background-image:var(--grid);transform:rotateX(64deg) scale(1.42);mask-image:radial-gradient(ellipse,#000 25%,transparent 70%);z-index:0;animation:grid-pan 17s linear infinite}
+@keyframes grid-pan{to{background-position:0 116px,0 0}}
+
+.scene-glow3d{position:absolute;top:36%;left:44%;width:480px;height:480px;transform:translate(-50%,-50%);background:radial-gradient(circle,#b6e06c22 0,#9fbf5422 34%,transparent 67%);filter:blur(22px);z-index:0}
+
+/* core orb */
+.orb{position:absolute;top:50%;left:50%;width:220px;height:220px;transform-style:preserve-3d;animation:orb-spin 21s linear infinite;z-index:2}
+.orb>div{position:absolute;inset:0;border-radius:50%;border-style:solid}
+.orb .ring-y{border:18px solid #b391f0;transform:rotateY(64deg);box-shadow:inset 4px 5px 7px #fff3,7px 7px 12px #432a7499,0 0 35px #b391f022}
+.orb .ring-x{border:18px solid #d1f876;transform:rotateX(64deg);box-shadow:inset 4px 5px 7px #fff3,7px 7px 12px #3d541299,0 0 35px #d1f87620}
+.orb .ring-tilt{border:14px solid #8fc9e0;transform:rotateX(-32deg) rotateY(38deg);box-shadow:inset 3px 4px 5px #fff4,5px 5px 9px #07313f99}
+.orb .core{inset:68px;border-radius:50%;background:radial-gradient(circle at 33% 25%,#f0ffd2,#9fd05d 62%,#4f7634 96%);box-shadow:0 0 90px #cdf68b33,0 0 25px #d5f98a22 inset,0 20px 40px #00000077;animation:core-pulse 4.5s ease-in-out infinite}
+@keyframes core-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.11)}}
+@keyframes orb-spin{to{transform:rotateX(360deg) rotateY(360deg)}}
+
+/* floating lab shelf */
+.lab-shelf,.lab-card{position:absolute;transform-style:preserve-3d;animation:lab-float 7.5s ease-in-out infinite}
+.lab-shelf{left:6%;top:12%}
+.lab-card{width:150px;padding:15px;background:#1d241bF0;border:1px solid #445739;border-radius:11px;box-shadow:0 22px 40px #0007,0 6px 0 #262d21;backdrop-filter:blur(5px)}
+.lab-card>small{font-size:9px;color:#93b47c;display:block;margin:5px 0 1px;letter-spacing:.4px}
+.lab-card>b{display:block;font-size:15px;color:#e2f4cf;font-weight:600;margin-top:3px}
+.lab-chip{display:inline-block;background:#d1f876;color:#23350f;font-size:8px;font-weight:700;padding:3px 8px;margin-top:8px}
+.shelf-2{left:63%;top:9%;animation-delay:-2.4s}
+.shelf-3{right:2%;bottom:23%;animation-delay:-4.9s}
+.shelf-3 .lab-card{width:168px}
+.shelf-1 .lab-card{width:143px}
+@keyframes lab-float{0%,100%{transform:translateY(0) rotateX(4deg) rotateY(-6deg)}50%{transform:translateY(-16px) rotateX(6deg) rotateY(6deg)}}
+@keyframes orb-glow{0%,100%{filter:drop-shadow(0 0 25px #d5f98a20)}50%{filter:drop-shadow(0 0 45px #d5f98a33)}}
+
+/* circuit pulse debug panel */
+.debug-panel{position:absolute;right:-2%;top:36%;width:178px;padding:14px 16px;background:linear-gradient(145deg,#202720f2,#151c11f0);border:1px solid #434533;border-radius:10px;transform:rotateY(-26deg) rotateZ(5deg);box-shadow:0 18px 37px #0007;animation:lab-float 8.7s ease-in-out infinite;z-index:3}
+.debug-panel>div{display:flex;justify-content:space-between;font-size:7.5px;color:#98b289;padding:4px 0;border-bottom:1px solid #39442d}
+.debug-panel>div:last-of-type{border:0}
+.debug-panel b{color:#d6f1bd;font-weight:500}
+.debug-live{display:flex;gap:5px;align-items:center;margin-top:8px;font-size:7px;color:#8faf72}
+.debug-live>i{width:5px;height:5px;background:#d1f876;border-radius:50%;animation:blink-dot 1.4s infinite}
+@keyframes blink-dot{50%{opacity:.25}}
+
+/* nametag / marquee pills */
+.hero-tag-3d{position:absolute;display:inline-flex;gap:7px;align-items:center;font-size:8px;letter-spacing:1px;background:#171e1580;color:#cfe7b4;padding:7px 11px;border:1px solid #465835;border-radius:20px;backdrop-filter:blur(5px);box-shadow:0 6px 20px #0004;z-index:4;animation:tag-hover 5s ease-in-out infinite}
+.hero-tag-3d svg{color:var(--lime);width:11px}
+@keyframes tag-hover{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.tag-a{left:6%}
+.tag-b{right:6%}
+.tag-c{left:45%}
+
+/* touch devices: make the "Explore component" hit-target visible (there is no hover) */
+@media(hover:none){
+  .preview-overlay{opacity:1;background:#0002}
+}
+
+/* 3D product-card tilt — mouse tracked */
+.tilt-card{transition:transform .13s ease-out;will-change:transform}
+.tilt-card.is-tilting{transform-style:preserve-3d}
+.tilt-glow{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .2s;background:radial-gradient(ellipse at var(--gx,50%) var(--gy,50%),#d1f87628,transparent 64%);z-index:0}
+.tilt-card.is-tilting>.tilt-glow{opacity:1}
+.hero-card{transform-style:preserve-3d}
+
+/* parallax hero pieces */
+.parallax-layer{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.depth-star{position:absolute;color:var(--lime);opacity:0}
+.depth-star>svg{width:100%;height:100%}
+@media(min-width:1160px){
+  .scene3d{height:535px}
+  .hero{min-height:600px}
+  .section-heading h2{font-size:32px}
+}
+@media(max-width:1000px){
+  .scene3d{height:430px;transform:scale(.84);transform-origin:center top}
+  .debug-panel{display:none}
+  .lab-shelf .lab-card{width:120px;font-size:8px}
+}
+@media(max-width:700px){
+  .scene3d{height:385px;transform:none;margin-top:20px;width:100%;max-width:390px;overflow:hidden}
+  .scene-grid3d{inset:-30px}
+  .orb{width:178px;height:178px;top:53%}
+  .orb .core{inset:55px}
+  .lab-shelf{left:3%}.lab-card{padding:11px}.lab-card>b{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .shelf-1{width:110px;left:4%}
+  .shelf-2{left:65%;width:110px}
+  .shelf-3{display:block;bottom:18%;width:124px;transform:rotate(-3deg)}
+  .shelf-3 .lab-card{width:124px;padding:10px;font-size:8px}
+  .debug-panel{display:none}
+  .hero-tag-3d{font-size:7px;padding:6px 9px;letter-spacing:.8px}
+  .hero-tag-3d:nth-child(2){left:3%!important;right:auto!important;bottom:auto!important;top:12%!important}
+  .hero-tag-3d:has(svg){left:auto!important;right:2%!important;top:44%!important}
+  .hero-tag-3d+span{max-width:130px;white-space:normal}
+}
+@media(prefers-reduced-motion:reduce){
+  .orb,.lab-shelf,.debug-panel,.hero-tag-3d,.scene-grid3d,.core{animation:none!important}
+  .scene3d{perspective:800px}
+}

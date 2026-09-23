@@ -1,0 +1,20 @@
+/* Users panel + Razorpay test */
+.rzp-test-btn{margin:0 22px 18px;width:calc(100% - 44px)}
+.rzp-result{display:flex;gap:9px;align-items:flex-start;margin:0 22px 20px;padding:13px 15px;border-radius:9px;font-size:11px;line-height:1.7}
+.rzp-ok{background:#bfe38d12;border:1px solid #83ac4f66;color:#cdefa6}
+.rzp-bad{background:#e7a1790d;border:1px solid #a4624659;color:#f0bda6}
+.activity-row{display:flex;align-items:center;gap:12px;padding:13px 22px;border-bottom:1px solid #2f4225}
+.activity-row:last-child{border:0}
+.activity-row>b{flex:1;font-size:11px;font-weight:500;color:#d5e8bd}
+.activity-row>small{font-size:9px;color:#7f9c68}
+.activity-icon{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;flex-shrink:0;background:#b8d49418;border:1px solid #56733c;color:#bfdf9f}
+.mongo-banner{align-items:center}
+.mongo-banner>div{flex:1}
+.mongo-banner>div>small{display:block;font-size:9px;color:#7f9d69;margin-top:6px}
+.mongo-connected{border-color:#7ca64d;background:#bfe38d0d}
+.mongo-pending{border-color:#8b7640;background:#dcbf7608}
+.mongo-test-btn{flex-shrink:0;min-height:36px;font-size:10px;padding:9px 12px}
+@media(max-width:700px){.mongo-banner{flex-wrap:wrap}.mongo-test-btn{width:100%}}
+.act-signup{background:#d1f87618;border-color:#8bbd4f;color:#d8f7a5}
+.act-failed{background:#e7a17914;border-color:#a4624659;color:#eeb49b}
+.act-login{background:#a7c9f714;border-color:#5f86b366;color:#b9d4f5}

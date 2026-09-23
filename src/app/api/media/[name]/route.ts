@@ -1,0 +1,3 @@
+import { readFile } from 'fs/promises';
+import path from 'path';
+export async function GET(_:Request,{params}:{params:Promise<{name:string}>}){const {name}=await params;if(!/^[a-f0-9-]+\.(jpg|png|webp|gif)$/.test(name))return new Response('Not found',{status:404});try{const data=await readFile(path.join(process.cwd(),'uploads',name));const ext=name.split('.').pop()!;return new Response(data,{headers:{'Content-Type':({'jpg':'image/jpeg','png':'image/png','webp':'image/webp','gif':'image/gif'} as Record<string,string>)[ext],'Cache-Control':'public, max-age=31536000, immutable','X-Content-Type-Options':'nosniff'}});}catch{return new Response('Not found',{status:404});}}

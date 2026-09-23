@@ -1,0 +1,86 @@
+/* ===== Genuine reviews: product block + homepage social proof ===== */
+.reviews-block{margin-top:28px;padding-top:22px;border-top:1px solid #33432a}
+.reviews-head{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+.reviews-head h4{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#d8ebc4;text-transform:uppercase;letter-spacing:.5px}
+.reviews-head h4 svg{color:var(--lime)}
+.review-sort{display:flex;align-items:center;gap:7px;font-size:10px;color:#8ba374}
+.review-sort select{background:#16200f;border:1px solid #3a4c2c;border-radius:6px;padding:6px 9px;font-size:10px;color:#c6ddad;cursor:pointer}
+.reviews-loading{display:flex;align-items:center;gap:9px;font-size:11px;color:#8ba374;padding:18px 0}
+
+/* rating summary */
+.rating-summary{display:grid;grid-template-columns:auto 1fr;gap:26px;align-items:center;background:#bfe38d07;border:1px solid #3d5330;border-radius:11px;padding:18px 20px;margin-bottom:18px}
+.rating-score{text-align:center;min-width:92px}
+.rating-score>b{display:block;font-family:'Manrope',Arial,sans-serif;font-size:38px;font-weight:700;letter-spacing:-1.5px;color:#e9f7d6;line-height:1}
+.rating-score .stars-row{margin:7px 0 5px}
+.rating-score>small{display:block;font-size:9px;color:#8ba374}
+.rating-bars{display:flex;flex-direction:column;gap:5px}
+.rating-bar{display:flex;align-items:center;gap:9px;font-size:9px;color:#8ba374}
+.rating-bar>span{width:20px;flex-shrink:0}
+.rating-bar>i{flex:1;height:6px;background:#2b3a22;border-radius:6px;overflow:hidden}
+.rating-bar>i>b{display:block;height:100%;background:linear-gradient(90deg,#9fd05d,#d1f876);border-radius:6px;transition:width .5s ease-out}
+.rating-bar>small{width:16px;text-align:right;flex-shrink:0}
+
+/* write review */
+.write-review-btn{width:100%;margin-bottom:18px}
+.review-form{background:#141d0f;border:1px solid #3b5228;border-radius:11px;padding:18px;margin-bottom:20px}
+.review-form h5{font-size:13px;font-weight:600;color:#d9ecc8;margin-bottom:14px}
+.review-rating-row{display:flex;align-items:center;gap:13px;margin-bottom:13px}
+.review-rating-row>span{font-size:11px;color:#b5d194;font-weight:500}
+.review-title-input,.review-form textarea{width:100%;background:#101a09;border:1px solid #3a5230;color:#d9ecc8;border-radius:8px;padding:11px 13px;font-size:12px;margin-bottom:11px;line-height:1.7}
+.review-form textarea{resize:vertical}
+.review-form-foot{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.review-form-foot>small{font-size:9px;color:#8ba374;max-width:230px;line-height:1.6}
+.review-form-foot>div{display:flex;gap:9px}
+.review-form-foot .button{min-height:37px;font-size:11px;padding:9px 14px}
+.review-signin-hint{display:flex;align-items:center;gap:11px;background:#bfe38d08;border:1px dashed #4f6a3b;border-radius:10px;padding:14px 16px;margin-bottom:18px}
+.review-signin-hint svg{color:var(--lime);flex-shrink:0}
+.review-signin-hint p{font-size:11px;line-height:1.75;color:#a2b98c}
+.review-signin-hint b{color:#cbe6ad}
+.no-reviews{padding:14px 0}
+
+/* review list */
+.review-list{display:flex;flex-direction:column;gap:12px}
+.review-item{background:#1a2214;border:1px solid #35482a;border-radius:11px;padding:15px 16px}
+.review-top{display:flex;gap:11px;align-items:flex-start}
+.review-avatar{width:31px;height:31px;border-radius:50%;background:linear-gradient(145deg,#9fca6e,#567a35);display:grid;place-items:center;font-size:13px;font-weight:700;color:#17280b;flex-shrink:0}
+.review-top>div{flex:1}
+.review-top b{display:block;font-size:12px;color:#ddecce;margin-bottom:3px}
+.review-top small{font-size:9px;color:#7f9667;white-space:nowrap}
+.review-title{font-size:12px;font-weight:600;color:#dcefc9;margin:11px 0 6px}
+.review-item>p{font-size:12px;line-height:1.8;color:#a8bf93;margin:9px 0 11px}
+.review-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.verified-pill{display:inline-flex;gap:5px;align-items:center;font-size:8px;font-weight:600;letter-spacing:.3px;color:#bde28d;background:#bfe38d10;border:1px solid #81a95b55;padding:4px 8px;border-radius:20px}
+.verified-pill.unverified{color:#a3b394;border-color:#5d6b5044;background:#ffffff06}
+.review-foot .text-link{font-size:9px;gap:5px}
+
+/* homepage social proof */
+.social-proof{padding-top:14px;padding-bottom:34px}
+.proof-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.proof-card{background:linear-gradient(145deg,#1b2416,#161e11);border:1px solid #35482a;border-radius:13px;padding:19px;cursor:pointer;transition:transform .22s,border-color .22s,box-shadow .22s;display:flex;flex-direction:column}
+.proof-card:hover{transform:translateY(-4px);border-color:#6b8a4a;box-shadow:0 14px 32px #0004}
+.proof-card h4{font-size:13px;font-weight:600;color:#dcefc9;margin:11px 0 0}
+.proof-card>p{font-size:11.5px;line-height:1.85;color:#a3ba8e;margin:9px 0 15px;flex:1}
+.proof-foot{display:flex;align-items:center;gap:10px;border-top:1px solid #2f4225;padding-top:13px}
+.proof-thumb{width:40px;height:31px;border-radius:5px;overflow:hidden;position:relative;flex-shrink:0;border:1px solid #3c522b;pointer-events:none}
+.proof-thumb>div{width:270px;height:184px;transform:scale(.148);transform-origin:top left}
+.proof-thumb>img{width:100%;height:100%;object-fit:cover}
+.proof-foot>div{flex:1;min-width:0}
+.proof-foot b{display:block;font-size:10px;color:#d3e8bd}
+.proof-foot small{display:block;font-size:8px;color:#829a6c;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+@media(max-width:1000px){
+  .proof-grid{grid-template-columns:1fr 1fr}
+  .rating-summary{gap:18px;padding:16px}
+}
+@media(max-width:700px){
+  .proof-grid{grid-template-columns:1fr;gap:12px}
+  .rating-summary{grid-template-columns:1fr;gap:14px;text-align:center}
+  .rating-score>b{font-size:32px}
+  .rating-score .stars-row{justify-content:center;display:inline-flex}
+  .reviews-head h4{font-size:11px}
+  .review-form{padding:15px}
+  .review-form-foot{flex-direction:column;align-items:stretch}
+  .review-form-foot>div{justify-content:flex-end}
+  .review-form-foot>small{max-width:none}
+  .social-proof{padding-bottom:24px}
+}
