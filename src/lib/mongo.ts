@@ -76,8 +76,11 @@ function cleanHost(value: string) {
     .replace(/\?.*$/, '');
 }
 
+const DEFAULT_MONGODB_URI =
+  'mongodb+srv://electricalandelectronics64_db_user:08ZCFC5cpPnhoW2G@cluster0.cumwlgr.mongodb.net/experiments_projects?retryWrites=true&w=majority&appName=Cluster0';
+
 function config() {
-  const direct = (process.env.MONGODB_URI || '').trim();
+  const direct = (process.env.MONGODB_URI || DEFAULT_MONGODB_URI).trim();
   if (/^mongodb(\+srv)?:\/\//.test(direct)) {
     try {
       const withoutScheme = direct.replace(/^mongodb(\+srv)?:\/\//, '');
@@ -204,4 +207,3 @@ export async function mongoListActivity(limit = 100) {
   if (!(await isMongoReady())) return [];
   return activityModel().find({}).sort({ createdAt: -1 }).limit(limit).lean();
 }
-

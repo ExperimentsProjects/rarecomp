@@ -21,11 +21,13 @@ Run from the folder that contains `package.json`:
 
 ```bash
 node scripts/check-vercel-ready.mjs
-npm ci
-npm run build
+npm ci          # verifies package-lock.json is present and valid
+npm run build   # verifies Next.js can compile for production
 ```
 
-The checker must print `VERCEL READY`.
+The checker must print `VERCEL READY` and `npm ci` must complete without the `EUSAGE` lockfile error.
+
+If `npm ci` fails, the folder is **still not ready for Vercel**. Do not push it yet — copy `package-lock.json` from this verified package into your project before retrying.
 
 ## 3. Push this exact folder to GitHub
 
