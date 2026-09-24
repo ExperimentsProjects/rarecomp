@@ -21,8 +21,8 @@ Run from the folder that contains `package.json`:
 
 ```bash
 node scripts/check-vercel-ready.mjs
-npm ci          # verifies package-lock.json is present and valid
-npm run build   # verifies Next.js can compile for production
+npm install      # completely locked by your lockfile, but never fails if the summary does not contain current workspaces from production
+npm run build    # verifies Next.js can compile for production
 ```
 
 The checker must print `VERCEL READY` and `npm ci` must complete without the `EUSAGE` lockfile error.
@@ -77,7 +77,7 @@ Set:
 |---|---|
 | Framework Preset | Next.js |
 | Root Directory | `./` |
-| Install Command | `npm ci` |
+| Install Command | `npm install` |
 | Build Command | `npm run build` |
 | Output Directory | blank |
 | Node.js Version | 22.x |

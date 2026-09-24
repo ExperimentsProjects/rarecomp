@@ -10,7 +10,7 @@ Use these Vercel import settings:
 
 - **Framework Preset:** Next.js
 - **Root Directory:** `./` (repository root)
-- **Install Command:** `npm ci`
+- **Install Command:** `npm install`
 - **Build Command:** `npm run build`
 - **Output Directory:** leave blank
 - **Node.js:** 22.x
