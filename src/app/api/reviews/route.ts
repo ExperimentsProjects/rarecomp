@@ -4,6 +4,7 @@ import { reviews, orders, products } from '@/db/schema';
 import { eq, and, desc, inArray } from 'drizzle-orm';
 import { getUser, getAdmin, sameOrigin } from '@/lib/auth';
 import { randomUUID } from 'crypto';
+import { dbReady } from '@/db/schema-ddl';
 
 /** True when this user has a confirmed (paid) order containing the product. */
 async function hasPurchased(userId: string, productId: string) {
@@ -11,7 +12,7 @@ async function hasPurchased(userId: string, productId: string) {
   return mine.some((o) => o.status === 'paid' && o.items.some((i) => i.id === productId));
 }
 
-export async function GET(req: Request) {
+export async function GET(req: Request) { await dbReady();
   try {
     const url = new URL(req.url);
     const productId = url.searchParams.get('productId');
@@ -52,7 +53,7 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: Request) { await dbReady();
   if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   const user = await getUser();
   if (!user) return NextResponse.json({ error: 'Please sign in to share your review.' }, { status: 401 });
@@ -87,7 +88,7 @@ export async function POST(req: Request) {
 }
 
 /** Customers can delete their own review; admins can moderate any review. */
-export async function DELETE(req: Request) {
+export async function DELETE(req: Request) { await dbReady();
   if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   const id = new URL(req.url).searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Missing review ID' }, { status: 400 });

@@ -86,7 +86,7 @@ img,svg,video,canvas,iframe{max-width:100%}
   .hero h1{font-size:clamp(48px,15vw,62px);line-height:1.02;letter-spacing:-3.1px}
   .headline-star{right:-42px;width:29px;height:29px}
   .hero-copy>p{font-size:12px;line-height:1.75;max-width:34rem}
-  .hero-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:22px}
+  .hero-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}
   .hero-actions .button{width:100%;min-width:0;min-height:44px;padding:10px 11px;font-size:10px;white-space:normal;text-align:center}
   .hero-social{margin-top:22px}
   .scene3d{width:100%;max-width:390px;height:350px;margin:14px auto 0;overflow:hidden}

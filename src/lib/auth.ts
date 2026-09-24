@@ -1,6 +1,7 @@
 import { cookies, headers } from 'next/headers';
 import { randomBytes, scryptSync, timingSafeEqual, createHash, randomUUID } from 'crypto';
 import { db } from '@/db';
+import { dbReady } from '@/db/schema-ddl';
 import { sessions, admins, userSessions } from '@/db/schema';
 import { eq, and, gt } from 'drizzle-orm';
 import { findUserById, createUserRecord } from './user-store';
@@ -68,6 +69,7 @@ async function headerToken(name: string) {
 export async function getAdmin() {
   const token = (await cookies()).get('stackd_admin')?.value || (await headerToken('x-admin-session'));
   if (!token) return null;
+  await dbReady();
   const [session] = await db.select().from(sessions).where(and(eq(sessions.token, tokenHash(token)), gt(sessions.expiresAt, new Date())));
   if (!session) return null;
   const [admin] = await db.select({ id: admins.id, name: admins.name, email: admins.email }).from(admins).where(eq(admins.id, session.adminId));
@@ -75,6 +77,7 @@ export async function getAdmin() {
 }
 
 export async function createSession(id: string, request?: Request) {
+  await dbReady();
   const token = randomBytes(32).toString('hex');
   await db.insert(sessions).values({ token: tokenHash(token), adminId: id, expiresAt: new Date(Date.now() + 86400000) });
   (await cookies()).set('stackd_admin', token, { ...cookieOptions(request ?? null), maxAge: 86400 });
@@ -84,6 +87,7 @@ export async function createSession(id: string, request?: Request) {
 export async function getUser() {
   const token = (await cookies()).get('ep_user')?.value || (await headerToken('x-user-session'));
   if (!token) return null;
+  await dbReady();
   const [session] = await db.select().from(userSessions).where(and(eq(userSessions.token, tokenHash(token)), gt(userSessions.expiresAt, new Date())));
   if (!session) return null;
   return findUserById(session.userId);
@@ -94,6 +98,7 @@ export async function createUser(user: { name: string; email: string; password: 
 }
 
 export async function createUserSession(userId: string, request?: Request) {
+  await dbReady();
   const token = randomBytes(32).toString('hex');
   await db.insert(userSessions).values({ token: tokenHash(token), userId, expiresAt: new Date(Date.now() + 14 * 86400000) });
   (await cookies()).set('ep_user', token, cookieOptions(request ?? null));

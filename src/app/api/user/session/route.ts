@@ -6,13 +6,14 @@ import { eq } from 'drizzle-orm';
 import { getUser, createUserSession, tokenHash, sameOrigin } from '@/lib/auth';
 import { findUserByEmail, userExists, createUserRecord, recordLogin } from '@/lib/user-store';
 import { verifyPassword } from '@/lib/auth-crypto';
+import { dbReady } from '@/db/schema-ddl';
 
-export async function GET() {
+export async function GET() { await dbReady();
   const user = await getUser();
   return NextResponse.json({ user });
 }
 
-export async function POST(req: Request) {
+export async function POST(req: Request) { await dbReady();
   if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   const meta = { ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '', userAgent: req.headers.get('user-agent') || '' };
   try {
@@ -39,12 +40,14 @@ export async function POST(req: Request) {
     const token = await createUserSession(user.id, req);
     return NextResponse.json({ success: true, token });
   } catch (e) {
-    console.error('User session error:', e instanceof Error ? e.message : e);
-    return NextResponse.json({ error: 'The store database could not be reached. Make sure DATABASE_URL is set, then try again.' }, { status: 503 });
+    const message = e instanceof Error ? e.message : 'Unable to process your account. Please try again.';
+    console.error('User session error:', message);
+    // dbReady already yields environment-specific, actionable messages — surface them.
+    return NextResponse.json({ error: message }, { status: /DATABASE_URL|reach PostgreSQL|password/i.test(message) ? 503 : 500 });
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: Request) { await dbReady();
   if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   const jar = await cookies();
   const token = jar.get('ep_user')?.value || req.headers.get('x-user-session') || undefined;

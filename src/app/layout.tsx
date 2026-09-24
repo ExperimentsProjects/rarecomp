@@ -9,6 +9,7 @@ import "./reviews.css";
 import "./policy.css";
 import "./responsive.css";
 import "./hardware.css";
+import "./footer.css";
 
 export const metadata: Metadata = {
   title: "Experiments_Projects — Build better. Ship faster.",

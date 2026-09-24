@@ -1,4 +1,5 @@
 import { db } from '@/db';
+import { dbReady } from '@/db/schema-ddl';
 import { settings } from '@/db/schema';
 
 const DEFAULTS: Record<string, string> = {
@@ -36,7 +37,9 @@ let cache: Record<string, string> | null = null;
 
 async function loadAll() {
   if (cache) return cache;
-  const rows = await db.select().from(settings).catch(() => [] as { key: string; value: string }[]);
+  const rows = await dbReady()
+    .then(() => db.select().from(settings))
+    .catch(() => [] as { key: string; value: string }[]);
   cache = { ...DEFAULTS };
   for (const row of rows) cache[row.key] = row.value;
   return cache;

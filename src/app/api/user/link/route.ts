@@ -3,8 +3,9 @@ import { db } from '@/db';
 import { orders } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getUser, sameOrigin } from '@/lib/auth';
+import { dbReady } from '@/db/schema-ddl';
 
-export async function POST(req: Request) {
+export async function POST(req: Request) { await dbReady();
   if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   const user = await getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

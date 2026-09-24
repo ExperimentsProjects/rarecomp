@@ -3,8 +3,9 @@ import { db } from '@/db';
 import { orders } from '@/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { getUser } from '@/lib/auth';
+import { dbReady } from '@/db/schema-ddl';
 
-export async function GET() {
+export async function GET() { await dbReady();
   const user = await getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {

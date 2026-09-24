@@ -204,3 +204,4 @@ export async function mongoListActivity(limit = 100) {
   if (!(await isMongoReady())) return [];
   return activityModel().find({}).sort({ createdAt: -1 }).limit(limit).lean();
 }
+

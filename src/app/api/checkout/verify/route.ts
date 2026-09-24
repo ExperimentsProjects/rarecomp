@@ -5,8 +5,9 @@ import { eq } from 'drizzle-orm';
 import { sameOrigin } from '@/lib/auth';
 import { getRazorpayKeys } from '@/lib/settings';
 import { verifyRazorpaySignature } from '@/lib/razorpay';
+import { dbReady } from '@/db/schema-ddl';
 
-export async function POST(req: Request) {
+export async function POST(req: Request) { await dbReady();
   try {
     if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
     const { token, razorpay_order_id, razorpay_payment_id, razorpay_signature } = await req.json();

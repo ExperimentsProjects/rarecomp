@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getAdmin, sameOrigin } from '@/lib/auth';
 import { getPublicSettings, getAdminSettings, updateSettings } from '@/lib/settings';
+import { dbReady } from '@/db/schema-ddl';
 
-export async function GET(req: Request) {
+export async function GET(req: Request) { await dbReady();
   try {
     if (new URL(req.url).searchParams.get('admin') === 'true' && (await getAdmin())) {
       return NextResponse.json(await getAdminSettings());
@@ -13,7 +14,7 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: Request) { await dbReady();
   if (!sameOrigin(req) || !(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
     const body = await req.json();

@@ -4,6 +4,7 @@ import { orders, products } from '@/db/schema';
 import { inArray, eq, desc } from 'drizzle-orm';
 import { getAdmin, getUser, sameOrigin } from '@/lib/auth';
 import { randomBytes, randomUUID } from 'crypto';
+import { dbReady } from '@/db/schema-ddl';
 
 const SHIPPING = ['processing', 'packed', 'shipped', 'out_for_delivery', 'delivered'];
 
@@ -17,7 +18,7 @@ function cleanAddress(data: Record<string, unknown>) {
   };
 }
 
-export async function validateCart(data: Record<string, unknown>) {
+export async function validateCart(data: Record<string, unknown>) { await dbReady();
   const { name, email, productIds } = data as { name: unknown; email: unknown; productIds: unknown };
   if (
     typeof name !== 'string' || !name.trim() ||
@@ -42,7 +43,7 @@ export async function validateCart(data: Record<string, unknown>) {
   } as const;
 }
 
-export async function POST(req: Request) {
+export async function POST(req: Request) { await dbReady();
   try {
     if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
     const data = await req.json();
@@ -68,7 +69,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
+export async function GET(req: Request) { await dbReady();
   const token = new URL(req.url).searchParams.get('token');
   if (token) {
     const [order] = await db.select().from(orders).where(eq(orders.token, token));
@@ -78,7 +79,7 @@ export async function GET(req: Request) {
   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 }
 
-export async function PATCH(req: Request) {
+export async function PATCH(req: Request) { await dbReady();
   if (!sameOrigin(req) || !(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
     const { id, status, shipping, courier, trackingUrl, address, city, state, pincode } = await req.json();

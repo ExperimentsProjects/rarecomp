@@ -4,6 +4,7 @@ import { admins } from '@/db/schema';
 import { sql } from 'drizzle-orm';
 import { randomBytes } from 'crypto';
 import { getAdmin, sameOrigin, hashPassword } from '@/lib/auth';
+import { dbReady } from '@/db/schema-ddl';
 
 const BOOTSTRAP_PASS = process.env.ADMIN_BOOTSTRAP_PASSWORD || 'ChangeMe@' + randomBytes(12).toString('base64url').slice(0, 16);
 
@@ -16,7 +17,7 @@ const BOOTSTRAP_PASS = process.env.ADMIN_BOOTSTRAP_PASSWORD || 'ChangeMe@' + ran
  * Enforces current-plan rules (password ≥ 8 chars). Once any admin exists it
  * answers 403, so it is strictly a recovery path — never a leak.
  */
-export async function POST(req: Request) {
+export async function POST(req: Request) { await dbReady();
   if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
 
   // If tables vanished after a sandbox reset, recreate them all.
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
 }
 
 /** Let a signed-in admin read whether the recovery path is needed. */
-export async function GET() {
+export async function GET() { await dbReady();
   const admin = await getAdmin();
   const [existing] = await db.select({ id: admins.id }).from(admins).limit(1).catch(() => [undefined]);
   return NextResponse.json({ admin, needsBootstrap: !existing, bootstrapAvailable: !existing });

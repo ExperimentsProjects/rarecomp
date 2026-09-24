@@ -5,9 +5,10 @@ import { getMongoStatus } from '@/lib/mongo';
 import { db } from '@/db';
 import { orders } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { dbReady } from '@/db/schema-ddl';
 
 /** Registered users + login activity for the admin panel. */
-export async function GET() {
+export async function GET() { await dbReady();
   if (!(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
     const { source, users, activity } = await listUsersForAdmin();
@@ -32,7 +33,7 @@ export async function GET() {
 }
 
 /** Remove a user's sessions (sign them out everywhere). */
-export async function DELETE(req: Request) {
+export async function DELETE(req: Request) { await dbReady();
   if (!sameOrigin(req) || !(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const id = new URL(req.url).searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Missing user ID' }, { status: 400 });

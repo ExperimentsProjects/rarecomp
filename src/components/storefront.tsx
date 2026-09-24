@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, ArrowUpRight, Search, ShoppingBag, ChevronDown, Check, Heart, X, SlidersHorizontal, Grid2X2, Box, Sparkles, Code2, ShieldCheck, Download, ExternalLink, Plus, Menu, UserRound, Star, CheckCircle2, Loader2, Trash2, Copy, Mail, RefreshCw, Package, Truck } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Search, ShoppingBag, ChevronDown, Check, Heart, X, SlidersHorizontal, Grid2X2, Box, Sparkles, Code2, ShieldCheck, Download, ExternalLink, Plus, Menu, UserRound, Star, CheckCircle2, Loader2, Trash2, Copy, Mail, Phone, RefreshCw, Package, Truck } from 'lucide-react';
 import type { Product, Order, Review, Section } from '@/db/schema';
 import type { StoreSettings } from '@/lib/settings';
 import { formatINR, isDigital } from '@/lib/money';
@@ -286,14 +286,14 @@ export default function Storefront() {
             <Brand />
           </Link>
           <nav className={mobile ? 'main-nav mobile-open' : 'main-nav'}>
-            <button onClick={() => browse()}>Components</button>
-            {sections
-              .filter((s) => /rare/i.test(s.name))
-              .map((s) => (
-                <button key={s.id} onClick={() => browse(s.id)}>
-                  {s.name} <span className="nav-new">RARE</span>
-                </button>
-              ))}
+            <button onClick={() => browse('all')}>All Parts</button>
+            <button onClick={() => browse('devices')}>
+              Devices <span className="nav-new">NEW</span>
+            </button>
+            <button onClick={() => browse('source-code')}>
+              Source Code <span className="nav-new">CODE</span>
+            </button>
+            <button onClick={() => browse('wireless')}>Wireless &amp; RF</button>
             <Link href="/account" className="nav-link-plain">
               My Orders
             </Link>
@@ -346,11 +346,14 @@ export default function Storefront() {
               Priced in ₹ with secure Razorpay checkout, and support from real builders across India.
             </p>
             <div className="hero-actions">
-              <button className="button button-lime" onClick={() => browse()}>
-                Explore the lab <ArrowUpRight size={18} />
+              <button className="button button-lime" onClick={() => browse('devices')}>
+                Shop Devices <ArrowUpRight size={18} />
               </button>
-              <button className="button button-secondary" onClick={() => browse(sections.find((s) => /rare/i.test(s.name))?.id || 'all')}>
-                Rare parts <Box size={16} />
+              <button className="button button-secondary" onClick={() => browse('source-code')}>
+                Source Code &amp; Firmware <Code2 size={16} />
+              </button>
+              <button className="button button-secondary" onClick={() => browse('all')}>
+                All Components <Box size={16} />
               </button>
             </div>
             <div className="hero-social">
@@ -598,12 +601,14 @@ export default function Storefront() {
         </section>
       </main>
 
-      <footer className="site-footer page-container">
-        <div className="footer-brand-col">
-          <Link href="/" className="brand-link">
-            <Brand small />
-          </Link>
-          <p>Premium components for builders. Priced in ₹, delivered across India.</p>
+      <footer className="site-footer page-container" aria-label="Website footer">
+        <div className="footer-brand-col footer-cell">
+          <div>
+            <Link href="/" className="brand-link">
+              <Brand small />
+            </Link>
+            <p>Genuine electronics, devices and source code for builders across India.</p>
+          </div>
           <div className="footer-socials">
             {socials.length ? (
               socials.map(({ name, icon: Icon, url }) => (
@@ -612,52 +617,64 @@ export default function Storefront() {
                 </a>
               ))
             ) : isAdmin ? (
-              <span className="footer-social-hint">Add your social links in Admin → Settings</span>
+              <span className="footer-social-hint">Add social links in Admin → Settings</span>
             ) : null}
           </div>
+          <span className="footer-trust"><ShieldCheck size={13} /> Secure Razorpay checkout</span>
         </div>
-        <div className="footer-col">
+
+        <div className="footer-col footer-cell footer-shop">
           <h4>Shop</h4>
-          <button onClick={() => browse()}>All components</button>
-          {sections.slice(0, 3).map((s) => (
-            <button key={s.id} onClick={() => browse(s.id)}>
-              {s.name}
-            </button>
-          ))}
+          <div className="footer-link-grid">
+            <button onClick={() => browse('all')}>All parts</button>
+            <button onClick={() => browse('devices')}>Devices</button>
+            <button onClick={() => browse('source-code')}>Source code</button>
+            <button onClick={() => browse('wireless')}>Wireless &amp; RF</button>
+          </div>
         </div>
-        <div className="footer-col">
+
+        <div className="footer-col footer-cell footer-policies">
           <h4>Policies</h4>
-          <Link href="/pages/return-policy">Return Policy</Link>
-          <Link href="/pages/refund-policy">Refund Policy</Link>
-          <Link href="/pages/shipping">Shipping Policy</Link>
-          <Link href="/pages/privacy">Privacy Policy</Link>
-          <Link href="/pages/disclaimer">Disclaimer</Link>
-          <Link href="/pages/terms">Terms of Service</Link>
+          <div className="footer-link-grid footer-policy-grid">
+            <Link href="/pages/return-policy">Returns</Link>
+            <Link href="/pages/refund-policy">Refunds</Link>
+            <Link href="/pages/shipping">Shipping</Link>
+            <Link href="/pages/privacy">Privacy</Link>
+            <Link href="/pages/disclaimer">Disclaimer</Link>
+            <Link href="/pages/terms">Terms</Link>
+          </div>
         </div>
-        <div className="footer-col">
+
+        <div className="footer-col footer-cell footer-company">
           <h4>Company</h4>
-          <Link href="/pages/about">About us</Link>
-          <Link href="/pages/contact">Contact us</Link>
-          <Link href="/account">My orders &amp; tracking</Link>
-          <Link href="/pages/contact">Help centre</Link>
+          <div className="footer-link-grid">
+            <Link href="/pages/about">About us</Link>
+            <Link href="/pages/contact">Contact</Link>
+            <Link href="/account">My orders</Link>
+            <Link href="/pages/contact">Help centre</Link>
+          </div>
         </div>
-        <div className="footer-col">
+
+        <div className="footer-col footer-cell footer-contact">
           <h4>Contact</h4>
-          <a href={'mailto:' + (settings?.contactEmail || 'electricalandelectronics64@gmail.com')}>{settings?.contactEmail || 'electricalandelectronics64@gmail.com'}</a>
-          <a href={'tel:' + (settings?.contactPhone || '+918639396238')}>{settings?.contactPhone || '+91 86393 96238'}</a>
-          <Link href="/pages/contact">Help centre</Link>
-          {isAdmin && (
-            <Link href="/admin" className="lime-text">
-              Admin panel <ArrowUpRight size={12} />
-            </Link>
-          )}
+          <div className="footer-contact-lines">
+            <a href={'mailto:' + (settings?.contactEmail || 'electricalandelectronics64@gmail.com')}>
+              <Mail size={13} /> <span>{settings?.contactEmail || 'electricalandelectronics64@gmail.com'}</span>
+            </a>
+            <a href={'tel:' + (settings?.contactPhone || '+918639396238')}>
+              <Phone size={13} /> <span>{settings?.contactPhone || '+91 86393 96238'}</span>
+            </a>
+            {isAdmin && (
+              <Link href="/admin" className="lime-text">
+                Admin panel <ArrowUpRight size={12} />
+              </Link>
+            )}
+          </div>
         </div>
       </footer>
       <div className="footer-bottom page-container">
-        <span>© {new Date().getFullYear()} Experiments_Projects. Made in India.</span>
-        <span className="footer-legal-links">
-          <Link href="/pages/return-policy">Returns</Link> · <Link href="/pages/refund-policy">Refunds</Link> · <Link href="/pages/privacy">Privacy</Link> · <Link href="/pages/disclaimer">Disclaimer</Link> · <Link href="/pages/terms">Terms</Link>
-        </span>
+        <span>© {new Date().getFullYear()} Experiments_Projects · Made in India</span>
+        <span className="footer-payment-note"><ShieldCheck size={12} /> Payments secured by Razorpay · Prices in INR</span>
       </div>
 
       {toast && (

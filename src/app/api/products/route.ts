@@ -6,10 +6,46 @@ import { getProducts, ensureCatalog } from '@/lib/catalog';
 import { getAdmin, sameOrigin } from '@/lib/auth';
 import { randomUUID } from 'crypto';
 
-const CATEGORIES = ['Development Boards', 'Wireless & RF', 'Antennas & Accessories', 'Modules & Sensors', 'Kits & Bundles', 'Freebies'];
-const PREVIEWS = ['hardware-board', 'hardware-module', 'hardware-antenna', 'hardware-kit', 'dashboard', 'orbit', 'pricing', 'landing', 'buttons', 'login', 'portfolio', 'aurora'];
+const CATEGORIES = [
+  'Devices',
+  'Source Code',
+  'Source Code & Firmware',
+  'Development Boards',
+  'Wireless & RF',
+  'Antennas & Accessories',
+  'Modules & Sensors',
+  'Kits & Bundles',
+  'Templates',
+  'Freebies',
+];
+const PREVIEWS = [
+  'hardware-device',
+  'hardware-code',
+  'hardware-board',
+  'hardware-module',
+  'hardware-antenna',
+  'hardware-kit',
+  'dashboard',
+  'orbit',
+  'pricing',
+  'landing',
+  'buttons',
+  'login',
+  'portfolio',
+  'aurora',
+];
 /** Categories delivered as a downloadable file rather than a shipped part. */
-export const DIGITAL_CATEGORIES = ['UI Components', '3D Components', 'Landing Pages', 'Dashboards', 'Templates', 'Freebies'];
+export const DIGITAL_CATEGORIES = [
+  'Source Code',
+  'Source Code & Firmware',
+  'Firmware',
+  'UI Components',
+  '3D Components',
+  'Landing Pages',
+  'Dashboards',
+  'Templates',
+  'Freebies',
+];
 export const isDigitalCategory = (category: string) => DIGITAL_CATEGORIES.includes(category);
 
 async function withRatings(list: (typeof products.$inferSelect)[]) {

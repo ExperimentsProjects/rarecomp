@@ -1,5 +1,15 @@
 /** Categories delivered as a downloadable file rather than a shipped part. */
-export const DIGITAL_CATEGORIES = ['UI Components', '3D Components', 'Landing Pages', 'Dashboards', 'Templates', 'Freebies'];
+export const DIGITAL_CATEGORIES = [
+  'Source Code',
+  'Source Code & Firmware',
+  'Firmware',
+  'UI Components',
+  '3D Components',
+  'Landing Pages',
+  'Dashboards',
+  'Templates',
+  'Freebies',
+];
 export const isDigital = (category: string) => DIGITAL_CATEGORIES.includes(category);
 
 export const formatINR = (paise: number) =>

@@ -4,8 +4,9 @@ import { sections, products } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getSections } from '@/lib/catalog';
 import { getAdmin, sameOrigin } from '@/lib/auth';
+import { dbReady } from '@/db/schema-ddl';
 
-export async function GET(req: Request) {
+export async function GET(req: Request) { await dbReady();
   try {
     const admin = new URL(req.url).searchParams.get('admin') === 'true' && (await getAdmin());
     return NextResponse.json(await getSections(!!admin));
@@ -14,7 +15,7 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: Request) { await dbReady();
   if (!sameOrigin(req) || !(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
     const { id, name, active, order } = await req.json();
@@ -35,7 +36,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: Request) { await dbReady();
   if (!sameOrigin(req) || !(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const id = new URL(req.url).searchParams.get('id');
   if (!id) return NextResponse.json({ error: 'Missing section ID' }, { status: 400 });

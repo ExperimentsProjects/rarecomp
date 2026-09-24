@@ -7,8 +7,9 @@ import { validateCart } from '@/app/api/orders/route';
 import { createRazorpayOrder } from '@/lib/razorpay';
 import { getRazorpayKeys } from '@/lib/settings';
 import { randomBytes, randomUUID } from 'crypto';
+import { dbReady } from '@/db/schema-ddl';
 
-export async function POST(req: Request) {
+export async function POST(req: Request) { await dbReady();
   try {
     if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
     const { enabled } = await getRazorpayKeys();
@@ -45,7 +46,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function PATCH(req: Request) {
+export async function PATCH(req: Request) { await dbReady();
   // Allow a client to recover the Razorpay order for retry-after-close within 30 minutes.
   if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   const { token } = await req.json();

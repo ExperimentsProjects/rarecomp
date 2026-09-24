@@ -1396,7 +1396,7 @@ export default function AdminPanel() {
                   <label>
                     Category
                     <select value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })}>
-                      {['UI Components', '3D Components', 'Landing Pages', 'Dashboards', 'Templates', 'Freebies'].map((x) => (
+                      {['Devices', 'Source Code', 'Development Boards', 'Wireless & RF', 'Antennas & Accessories', 'Modules & Sensors', 'Kits & Bundles', 'Freebies'].map((x) => (
                         <option key={x}>{x}</option>
                       ))}
                     </select>
@@ -1436,6 +1436,8 @@ export default function AdminPanel() {
                     Starter layout / preview
                     <select value={draft.preview} onChange={(e) => setDraft({ ...draft, preview: e.target.value })}>
                       {[
+                        ['hardware-device', 'Assembled Device (Screen & Box)'],
+                        ['hardware-code', 'Source Code / Firmware (Editor)'],
                         ['hardware-board', 'Dev board (PCB with headers)'],
                         ['hardware-module', 'RF module (shielded)'],
                         ['hardware-antenna', 'Antenna (SMA whip)'],
