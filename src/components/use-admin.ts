@@ -13,7 +13,7 @@ export function useIsAdmin() {
   useEffect(() => {
     let active = true;
     patchFetchWithSessionTokens();
-    fetch('/api/admin/session')
+    fetch('/api/admin/session', { cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : { admin: null }))
       .then((d) => {
         if (active) setIsAdmin(!!d?.admin);

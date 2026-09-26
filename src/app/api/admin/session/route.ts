@@ -8,6 +8,8 @@ import { dbReady } from '@/db/schema-ddl';
 
 const attempts = new Map<string, { count: number; until: number }>();
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const readiness = await dbReady();

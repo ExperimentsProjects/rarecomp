@@ -7,14 +7,12 @@ import type { Order } from '@/db/schema';
 import { formatINR } from '@/lib/money';
 import { Brand, InstagramIcon, YoutubeIcon, XIcon } from './visuals';
 import { ShippingSteps } from './ship-steps';
-import { useIsAdmin } from './use-admin';
 import { patchFetchWithSessionTokens, saveSessionToken, clearSessionToken, captureTokenFromUrl, loginUrl } from './session-token';
 import Modal from './modal';
 
 type User = { id: string; name: string; email: string } | null;
 
 export default function Account() {
-  const isAdmin = useIsAdmin();
   const [user, setUser] = useState<User>(null);
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -153,11 +151,7 @@ export default function Account() {
           <Link className="text-link" href="/">
             <ArrowLeft size={14} /> Continue shopping
           </Link>
-          {isAdmin && (
-            <Link className="text-link lime-text" href="/admin">
-              Admin panel <ArrowUpRight size={12} />
-            </Link>
-          )}
+
         </div>
       </header>
 

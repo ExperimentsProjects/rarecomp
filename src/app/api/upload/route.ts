@@ -22,14 +22,31 @@ export async function POST(req: Request) {
     const ext = EXT[file.type];
     if (!ext) return NextResponse.json({ error: 'Only JPG, PNG, WebP, and GIF images are supported.' }, { status: 400 });
 
-    // Support both standard and Vercel-pasted naming variations
+    // Support both standard and Vercel-pasted naming variations.
     const token = process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN_READ_WRITE_TOKEN;
 
     if (token) {
-      const { put } = await import('@vercel/blob');
-      const filename = `products/${randomUUID()}.${ext}`;
-      const blob = await put(filename, file, { access: 'public', contentType: file.type, token });
-      return NextResponse.json({ url: blob.url });
+      try {
+        const { put } = await import('@vercel/blob');
+        const filename = `products/${randomUUID()}.${ext}`;
+        const blob = await put(filename, file, { access: 'public', contentType: file.type, token });
+        return NextResponse.json({ url: blob.url });
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        return NextResponse.json({ error: `Vercel Blob upload failed: ${message}` }, { status: 500 });
+      }
+    }
+
+    // Local sandbox / development fallback only. Vercel has a read-only, ephemeral filesystem,
+    // so without Blob configured we must return a precise setup error instead of pretending to save.
+    if (process.env.VERCEL) {
+      return NextResponse.json(
+        {
+          error:
+            'Vercel Blob is not configured. Add BLOB_READ_WRITE_TOKEN (or BLOB_READ_WRITE_TOKEN_READ_WRITE_TOKEN) in Vercel → Project → Settings → Environment Variables, then redeploy.',
+        },
+        { status: 500 },
+      );
     }
 
     const filename = randomUUID() + '.' + ext;
@@ -37,7 +54,7 @@ export async function POST(req: Request) {
     await mkdir(dir, { recursive: true });
     await writeFile(path.join(dir, filename), Buffer.from(await file.arrayBuffer()));
     return NextResponse.json({ url: '/api/media/' + filename });
-  } catch {
-    return NextResponse.json({ error: 'Upload failed. Please try again.' }, { status: 500 });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : 'Upload failed. Please try again.' }, { status: 500 });
   }
 }

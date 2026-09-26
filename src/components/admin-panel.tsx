@@ -278,9 +278,10 @@ export default function AdminPanel() {
       const body = new FormData();
       body.set('file', file);
       const r = await fetch('/api/upload', { method: 'POST', body });
-      const data = await r.json();
-      if (!r.ok) throw Error(data.error);
+      const data = await r.json().catch(() => ({ error: 'Upload route did not return JSON.' }));
+      if (!r.ok) throw Error(data.error || 'Upload failed.');
       setDraft((d) => ({ ...d, image: data.url }));
+      setNotice('Image uploaded successfully.');
     } catch (e) {
       setFormError(e instanceof Error ? e.message : 'Upload failed.');
     } finally {

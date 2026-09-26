@@ -8,6 +8,8 @@ import { findUserByEmail, userExists, createUserRecord, recordLogin } from '@/li
 import { verifyPassword } from '@/lib/auth-crypto';
 import { dbReady } from '@/db/schema-ddl';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const readiness = await dbReady();
