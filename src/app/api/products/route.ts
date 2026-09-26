@@ -5,6 +5,7 @@ import { eq, sql } from 'drizzle-orm';
 import { getProducts, ensureCatalog } from '@/lib/catalog';
 import { getAdmin, sameOrigin } from '@/lib/auth';
 import { randomUUID } from 'crypto';
+import { dbReady } from '@/db/schema-ddl';
 
 const CATEGORIES = [
   'Devices',
@@ -18,6 +19,7 @@ const CATEGORIES = [
   'Templates',
   'Freebies',
 ];
+
 const PREVIEWS = [
   'hardware-device',
   'hardware-code',
@@ -34,19 +36,6 @@ const PREVIEWS = [
   'portfolio',
   'aurora',
 ];
-/** Categories delivered as a downloadable file rather than a shipped part. */
-export const DIGITAL_CATEGORIES = [
-  'Source Code',
-  'Source Code & Firmware',
-  'Firmware',
-  'UI Components',
-  '3D Components',
-  'Landing Pages',
-  'Dashboards',
-  'Templates',
-  'Freebies',
-];
-export const isDigitalCategory = (category: string) => DIGITAL_CATEGORIES.includes(category);
 
 async function withRatings(list: (typeof products.$inferSelect)[]) {
   const rows = await db
@@ -60,20 +49,27 @@ async function withRatings(list: (typeof products.$inferSelect)[]) {
 
 export async function GET(req: Request) {
   try {
+    const readiness = await dbReady();
+    if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
+
     await ensureCatalog();
     if (new URL(req.url).searchParams.get('admin') === 'true' && (await getAdmin())) {
       return NextResponse.json(await withRatings(await db.select().from(products)));
     }
     const data = await withRatings(await getProducts());
     return NextResponse.json(data.map(({ source, ...p }) => ({ ...p, hasSource: !!source })));
-  } catch {
-    return NextResponse.json({ error: 'The catalog is temporarily unavailable.' }, { status: 500 });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }
 }
 
 export async function POST(req: Request) {
-  if (!sameOrigin(req) || !(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   try {
+    const readiness = await dbReady();
+    if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
+    if (!(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const data = await req.json();
     if (
       typeof data.name !== 'string' || !data.name.trim() ||
@@ -125,15 +121,23 @@ export async function POST(req: Request) {
     }
     const [result] = await db.insert(products).values({ id: randomUUID(), ...values }).returning();
     return NextResponse.json(result, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'Could not save component.' }, { status: 500 });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }
 }
 
 export async function DELETE(req: Request) {
-  if (!sameOrigin(req) || !(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const id = new URL(req.url).searchParams.get('id');
-  if (!id) return NextResponse.json({ error: 'Missing product ID' }, { status: 400 });
-  await db.update(products).set({ active: false }).where(eq(products.id, id));
-  return NextResponse.json({ success: true });
+  if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
+  try {
+    const readiness = await dbReady();
+    if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
+    if (!(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const id = new URL(req.url).searchParams.get('id');
+    if (!id) return NextResponse.json({ error: 'Missing product ID' }, { status: 400 });
+    await db.update(products).set({ active: false }).where(eq(products.id, id));
+    return NextResponse.json({ success: true });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
+  }
 }

@@ -22,10 +22,13 @@ export async function POST(req: Request) {
     const ext = EXT[file.type];
     if (!ext) return NextResponse.json({ error: 'Only JPG, PNG, WebP, and GIF images are supported.' }, { status: 400 });
 
-    if (process.env.BLOB_READ_WRITE_TOKEN) {
+    // Support both standard and Vercel-pasted naming variations
+    const token = process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN_READ_WRITE_TOKEN;
+
+    if (token) {
       const { put } = await import('@vercel/blob');
       const filename = `products/${randomUUID()}.${ext}`;
-      const blob = await put(filename, file, { access: 'public', contentType: file.type });
+      const blob = await put(filename, file, { access: 'public', contentType: file.type, token });
       return NextResponse.json({ url: blob.url });
     }
 

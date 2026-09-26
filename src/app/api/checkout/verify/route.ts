@@ -7,9 +7,12 @@ import { getRazorpayKeys } from '@/lib/settings';
 import { verifyRazorpaySignature } from '@/lib/razorpay';
 import { dbReady } from '@/db/schema-ddl';
 
-export async function POST(req: Request) { await dbReady();
+export async function POST(req: Request) {
+  if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   try {
-    if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
+    const readiness = await dbReady();
+    if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
+
     const { token, razorpay_order_id, razorpay_payment_id, razorpay_signature } = await req.json();
     if (
       typeof token !== 'string' || typeof razorpay_order_id !== 'string' ||
@@ -31,7 +34,7 @@ export async function POST(req: Request) { await dbReady();
       .where(eq(orders.id, order.id))
       .returning();
     return NextResponse.json(updated);
-  } catch {
-    return NextResponse.json({ error: 'Could not verify the payment.' }, { status: 500 });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }
 }

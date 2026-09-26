@@ -3,16 +3,17 @@ import { getAdmin, sameOrigin } from '@/lib/auth';
 import { listUsersForAdmin } from '@/lib/user-store';
 import { getMongoStatus } from '@/lib/mongo';
 import { db } from '@/db';
-import { orders } from '@/db/schema';
+import { orders, userSessions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { dbReady } from '@/db/schema-ddl';
 
-/** Registered users + login activity for the admin panel. */
-export async function GET() { await dbReady();
-  if (!(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+export async function GET() {
   try {
+    const readiness = await dbReady();
+    if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
+    if (!(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const { source, users, activity } = await listUsersForAdmin();
-    // Enrich with order counts + spend so the panel is genuinely useful.
     const enriched = await Promise.all(
       users.map(async (u) => {
         const rows = await db.select({ total: orders.total, status: orders.status }).from(orders).where(eq(orders.userId, u.id));
@@ -27,18 +28,23 @@ export async function GET() { await dbReady();
     );
     const mongo = await getMongoStatus();
     return NextResponse.json({ source, mongoConnected: mongo.connected, mongo, users: enriched, activity });
-  } catch {
-    return NextResponse.json({ error: 'Could not load users.' }, { status: 500 });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }
 }
 
-/** Remove a user's sessions (sign them out everywhere). */
-export async function DELETE(req: Request) { await dbReady();
-  if (!sameOrigin(req) || !(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const id = new URL(req.url).searchParams.get('id');
-  if (!id) return NextResponse.json({ error: 'Missing user ID' }, { status: 400 });
-  const { db: database } = await import('@/db');
-  const { userSessions } = await import('@/db/schema');
-  await database.delete(userSessions).where(eq(userSessions.userId, id));
-  return NextResponse.json({ success: true });
+export async function DELETE(req: Request) {
+  if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
+  try {
+    const readiness = await dbReady();
+    if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
+    if (!(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const id = new URL(req.url).searchParams.get('id');
+    if (!id) return NextResponse.json({ error: 'Missing user ID' }, { status: 400 });
+    await db.delete(userSessions).where(eq(userSessions.userId, id));
+    return NextResponse.json({ success: true });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
+  }
 }

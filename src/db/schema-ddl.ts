@@ -109,34 +109,54 @@ function humaniseDbError(input: string): string {
   return input.slice(0, 300);
 }
 
-let ddlPromise: Promise<void> | undefined;
+export type DbReadiness = { ok: boolean; error?: string };
 
-export async function dbReady() {
-  const url = process.env.DATABASE_URL;
+let ddlPromise: Promise<DbReadiness> | undefined;
+
+/**
+ * Checks database readiness and provisions tables if needed.
+ * NEVER crashes API routes — returns a status object so routes can decide
+ * whether to continue gracefully and let an inner try-catch produce
+ * proper JSON responses.
+ */
+export async function dbReady(): Promise<DbReadiness> {
+  // Accept either Vercel-provided name so the Neon/Postgres integration always works.
+  // Strip channel_binding param which can cause issues with some pg driver versions.
+  const rawUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+  const url = rawUrl?.replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?$/, '');
   if (!url) {
-    throw new Error(
-      'DATABASE_URL is not set in your hosting environment. In Railway or Vercel, open your app service → Variables → add DATABASE_URL with the full PostgreSQL connection URL from your database Connect page (host must not be 127.0.0.1), then redeploy.',
-    );
+    console.error('[DB] DATABASE_URL / POSTGRES_URL are not set in hosting environment.');
+    return {
+      ok: false,
+      error:
+        "DATABASE_URL is not set in your hosting environment. In Vercel: Project → Settings → Environment Variables → add DATABASE_URL with the **hosted** PostgreSQL URL (Neon/Supabase/Railway, NOT 127.0.0.1 — Vercel's servers can't reach localhost), then click Redeploy. If you connected the Vercel Neon integration, also confirm POSTGRES_URL exists as it's injected automatically.",
+    };
   }
   if (!ddlPromise) {
-    ddlPromise = (async () => {
+    ddlPromise = (async (): Promise<DbReadiness> => {
       const needsSsl = !/localhost|127\.0\.0\.1/.test(url);
-      const pool = new Pool({
-        connectionString: url,
-        ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
-        max: 2,
-        connectionTimeoutMillis: 10000,
-        idleTimeoutMillis: 10000,
-      });
+      let pool: Pool | null = null;
       try {
+        pool = new Pool({
+          connectionString: url,
+          ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
+          max: 2,
+          connectionTimeoutMillis: 8000,
+          idleTimeoutMillis: 5000,
+        });
         for (const statement of DDL) await pool.query(statement);
+        return { ok: true };
+      } catch (e) {
+        ddlPromise = undefined; // retry on next request
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error('[DB] Initialization failed:', msg);
+        return { ok: false, error: humaniseDbError(msg) };
       } finally {
-        await pool.end().catch(() => {});
+        try {
+          await pool?.end();
+        } catch {/* ignore */}
       }
-    })().catch((e) => {
-      ddlPromise = undefined; // allow retry on next request
-      throw new Error(humaniseDbError(e instanceof Error ? e.message : String(e)));
-    });
+    })();
   }
-  await ddlPromise;
+  return ddlPromise;
 }

@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Experiments & Projects favicon">
+  <defs>
+    <path id="topArc" d="M 22 92 A 68 68 0 0 1 158 92" />
+    <path id="bottomArc" d="M 158 92 A 68 68 0 0 1 22 92" />
+    <radialGradient id="goldCore" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#ffe880"/>
+      <stop offset="58%" stop-color="#ffc400"/>
+      <stop offset="100%" stop-color="#ff9800"/>
+    </radialGradient>
+    <linearGradient id="gearRed" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff2a2a"/>
+      <stop offset="100%" stop-color="#b60000"/>
+    </linearGradient>
+    <linearGradient id="darkSteel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#444"/>
+      <stop offset="100%" stop-color="#121212"/>
+    </linearGradient>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <rect width="180" height="180" rx="18" fill="#ffffff"/>
+
+  <!-- circular text -->
+  <g fill="#111111" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="16" letter-spacing="5">
+    <text>
+      <textPath href="#topArc" startOffset="50%" text-anchor="middle">EXPERIMENTS</textPath>
+    </text>
+    <text>
+      <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">PROJECTS</textPath>
+    </text>
+  </g>
+  <g fill="#111111" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="16">
+    <text x="18" y="94" transform="rotate(-90 18 94)">&amp;</text>
+    <text x="162" y="94" transform="rotate(90 162 94)">&amp;</text>
+  </g>
+
+  <!-- main half-gear -->
+  <g transform="translate(90 95)" filter="url(#softShadow)">
+    <!-- black half gear back -->
+    <path d="M-40 0a40 40 0 1 1 0-0.1v14a26 26 0 1 0 0-27.8z" fill="url(#darkSteel)"/>
+    <!-- red teeth ring -->
+    <g fill="url(#gearRed)">
+      <rect x="-7" y="-56" width="14" height="14" rx="2"/>
+      <rect x="23" y="-49" width="14" height="14" rx="2" transform="rotate(35)"/>
+      <rect x="42" y="-28" width="14" height="14" rx="2" transform="rotate(65)"/>
+      <rect x="48" y="2" width="14" height="14" rx="2" transform="rotate(95)"/>
+      <rect x="40" y="30" width="14" height="14" rx="2" transform="rotate(125)"/>
+      <rect x="20" y="50" width="14" height="14" rx="2" transform="rotate(155)"/>
+      <rect x="-9" y="57" width="14" height="14" rx="2" transform="rotate(180)"/>
+      <rect x="-38" y="49" width="14" height="14" rx="2" transform="rotate(215)"/>
+      <rect x="-56" y="28" width="14" height="14" rx="2" transform="rotate(245)"/>
+      <rect x="-63" y="-2" width="14" height="14" rx="2" transform="rotate(275)"/>
+      <rect x="-55" y="-30" width="14" height="14" rx="2" transform="rotate(305)"/>
+      <rect x="-35" y="-50" width="14" height="14" rx="2" transform="rotate(335)"/>
+    </g>
+    <!-- cutout / inner wheel -->
+    <circle r="28" fill="#ffffff"/>
+    <circle r="22" fill="url(#darkSteel)"/>
+    <circle r="11.5" fill="url(#goldCore)" stroke="#ffe7a3" stroke-width="2"/>
+    <circle r="3.8" fill="#c40000"/>
+    <!-- spokes -->
+    <g stroke="#8a0000" stroke-width="2.6" stroke-linecap="round">
+      <line x1="0" y1="-11" x2="0" y2="-21"/>
+      <line x1="10" y1="0" x2="20" y2="0"/>
+      <line x1="0" y1="11" x2="0" y2="21"/>
+      <line x1="-10" y1="0" x2="-20" y2="0"/>
+      <line x1="7.8" y1="-7.8" x2="14.8" y2="-14.8"/>
+      <line x1="7.8" y1="7.8" x2="14.8" y2="14.8"/>
+      <line x1="-7.8" y1="7.8" x2="-14.8" y2="14.8"/>
+      <line x1="-7.8" y1="-7.8" x2="-14.8" y2="-14.8"/>
+    </g>
+  </g>
+
+  <!-- small gear 1 -->
+  <g transform="translate(122 121) scale(0.52)" filter="url(#softShadow)">
+    <g fill="url(#gearRed)">
+      <rect x="-6" y="-26" width="12" height="12" rx="2"/>
+      <rect x="10" y="-22" width="12" height="12" rx="2" transform="rotate(35)"/>
+      <rect x="20" y="-11" width="12" height="12" rx="2" transform="rotate(65)"/>
+      <rect x="24" y="5" width="12" height="12" rx="2" transform="rotate(95)"/>
+      <rect x="19" y="20" width="12" height="12" rx="2" transform="rotate(125)"/>
+      <rect x="8" y="30" width="12" height="12" rx="2" transform="rotate(155)"/>
+      <rect x="-8" y="34" width="12" height="12" rx="2" transform="rotate(180)"/>
+      <rect x="-23" y="29" width="12" height="12" rx="2" transform="rotate(215)"/>
+      <rect x="-33" y="18" width="12" height="12" rx="2" transform="rotate(245)"/>
+      <rect x="-37" y="2" width="12" height="12" rx="2" transform="rotate(275)"/>
+      <rect x="-32" y="-13" width="12" height="12" rx="2" transform="rotate(305)"/>
+      <rect x="-21" y="-24" width="12" height="12" rx="2" transform="rotate(335)"/>
+    </g>
+    <circle r="15" fill="#ffffff"/>
+    <circle r="11" fill="url(#darkSteel)"/>
+    <circle r="5.6" fill="url(#goldCore)"/>
+    <circle r="2" fill="#c40000"/>
+  </g>
+
+  <!-- small gear 2 -->
+  <g transform="translate(142 99) scale(0.34)" filter="url(#softShadow)">
+    <g fill="url(#gearRed)">
+      <rect x="-5" y="-22" width="10" height="10" rx="1.6"/>
+      <rect x="10" y="-18" width="10" height="10" rx="1.6" transform="rotate(45)"/>
+      <rect x="19" y="-8" width="10" height="10" rx="1.6" transform="rotate(75)"/>
+      <rect x="22" y="7" width="10" height="10" rx="1.6" transform="rotate(105)"/>
+      <rect x="16" y="19" width="10" height="10" rx="1.6" transform="rotate(135)"/>
+      <rect x="4" y="26" width="10" height="10" rx="1.6" transform="rotate(165)"/>
+      <rect x="-11" y="27" width="10" height="10" rx="1.6" transform="rotate(195)"/>
+      <rect x="-23" y="19" width="10" height="10" rx="1.6" transform="rotate(225)"/>
+      <rect x="-29" y="6" width="10" height="10" rx="1.6" transform="rotate(255)"/>
+      <rect x="-27" y="-8" width="10" height="10" rx="1.6" transform="rotate(285)"/>
+      <rect x="-18" y="-19" width="10" height="10" rx="1.6" transform="rotate(315)"/>
+      <rect x="-5" y="-26" width="10" height="10" rx="1.6" transform="rotate(345)"/>
+    </g>
+    <circle r="12" fill="#ffffff"/>
+    <circle r="8.5" fill="url(#darkSteel)"/>
+    <circle r="4.2" fill="url(#goldCore)"/>
+    <circle r="1.8" fill="#c40000"/>
+  </g>
+</svg>

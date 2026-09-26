@@ -18,7 +18,8 @@ function cleanAddress(data: Record<string, unknown>) {
   };
 }
 
-export async function validateCart(data: Record<string, unknown>) { await dbReady();
+export async function validateCart(data: Record<string, unknown>) {
+  await dbReady();
   const { name, email, productIds } = data as { name: unknown; email: unknown; productIds: unknown };
   if (
     typeof name !== 'string' || !name.trim() ||
@@ -43,9 +44,12 @@ export async function validateCart(data: Record<string, unknown>) { await dbRead
   } as const;
 }
 
-export async function POST(req: Request) { await dbReady();
+export async function POST(req: Request) {
+  if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   try {
-    if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
+    const readiness = await dbReady();
+    if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
+
     const data = await req.json();
     const result = await validateCart(data);
     if ('error' in result) return NextResponse.json({ error: result.error }, { status: 400 });
@@ -64,24 +68,34 @@ export async function POST(req: Request) { await dbReady();
       })
       .returning();
     return NextResponse.json(order, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'Unable to place your order. Please try again.' }, { status: 500 });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }
 }
 
-export async function GET(req: Request) { await dbReady();
-  const token = new URL(req.url).searchParams.get('token');
-  if (token) {
-    const [order] = await db.select().from(orders).where(eq(orders.token, token));
-    return order ? NextResponse.json(order) : NextResponse.json({ error: 'Order not found' }, { status: 404 });
-  }
-  if (await getAdmin()) return NextResponse.json(await db.select().from(orders).orderBy(desc(orders.createdAt)));
-  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-}
-
-export async function PATCH(req: Request) { await dbReady();
-  if (!sameOrigin(req) || !(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+export async function GET(req: Request) {
   try {
+    const readiness = await dbReady();
+    if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
+
+    const token = new URL(req.url).searchParams.get('token');
+    if (token) {
+      const [order] = await db.select().from(orders).where(eq(orders.token, token));
+      return order ? NextResponse.json(order) : NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+    if (await getAdmin()) return NextResponse.json(await db.select().from(orders).orderBy(desc(orders.createdAt)));
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const readiness = await dbReady();
+    if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
+    if (!(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const { id, status, shipping, courier, trackingUrl, address, city, state, pincode } = await req.json();
     const updates: Record<string, unknown> = {};
     if (status !== undefined) {
@@ -103,7 +117,7 @@ export async function PATCH(req: Request) { await dbReady();
     if (!Object.keys(updates).length) return NextResponse.json({ error: 'Nothing to update' }, { status: 400 });
     const [order] = await db.update(orders).set(updates).where(eq(orders.id, id)).returning();
     return order ? NextResponse.json(order) : NextResponse.json({ error: 'Order not found' }, { status: 404 });
-  } catch {
-    return NextResponse.json({ error: 'Could not update the order.' }, { status: 500 });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }
 }

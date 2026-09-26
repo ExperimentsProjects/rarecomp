@@ -17,7 +17,10 @@ const globalForDb = globalThis as typeof globalThis & {
 function resolveDb(): NodePgDatabase {
   if (globalForDb.__epPgDb) return globalForDb.__epPgDb;
 
-  const databaseUrl = process.env.DATABASE_URL;
+  // Vercel's Postgres integrations expose DATABASE_URL and/or POSTGRES_URL.
+  // Strip channel_binding param which can cause issues with some pg driver versions.
+  const rawUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+  const databaseUrl = rawUrl?.replace(/[?&]channel_binding=[^&]*/g, '').replace(/\?$/, '');
   if (!databaseUrl) {
     throw new Error(
       "DATABASE_URL is not configured. Add your hosted PostgreSQL connection string (Neon/Supabase/Railway) to the environment variables, then redeploy.",

@@ -6,18 +6,25 @@ import { getSections } from '@/lib/catalog';
 import { getAdmin, sameOrigin } from '@/lib/auth';
 import { dbReady } from '@/db/schema-ddl';
 
-export async function GET(req: Request) { await dbReady();
+export async function GET(req: Request) {
   try {
+    const readiness = await dbReady();
+    if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
+
     const admin = new URL(req.url).searchParams.get('admin') === 'true' && (await getAdmin());
     return NextResponse.json(await getSections(!!admin));
-  } catch {
-    return NextResponse.json({ error: 'Sections are temporarily unavailable.' }, { status: 500 });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }
 }
 
-export async function POST(req: Request) { await dbReady();
-  if (!sameOrigin(req) || !(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+export async function POST(req: Request) {
+  if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   try {
+    const readiness = await dbReady();
+    if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
+    if (!(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const { id, name, active, order } = await req.json();
     if (typeof name !== 'string' || !name.trim() || name.length > 60)
       return NextResponse.json({ error: 'Section name is required (max 60 characters).' }, { status: 400 });
@@ -31,20 +38,24 @@ export async function POST(req: Request) { await dbReady();
     const unique = slug + '-' + Math.random().toString(36).slice(2, 6);
     const [result] = await db.insert(sections).values({ id: unique, ...values }).returning();
     return NextResponse.json(result, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: 'Could not save the section.' }, { status: 500 });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }
 }
 
-export async function DELETE(req: Request) { await dbReady();
-  if (!sameOrigin(req) || !(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  const id = new URL(req.url).searchParams.get('id');
-  if (!id) return NextResponse.json({ error: 'Missing section ID' }, { status: 400 });
+export async function DELETE(req: Request) {
+  if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
   try {
+    const readiness = await dbReady();
+    if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
+    if (!(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const id = new URL(req.url).searchParams.get('id');
+    if (!id) return NextResponse.json({ error: 'Missing section ID' }, { status: 400 });
     await db.update(products).set({ sectionId: null }).where(eq(products.sectionId, id));
     await db.delete(sections).where(eq(sections.id, id));
     return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ error: 'Could not delete the section.' }, { status: 500 });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }
 }

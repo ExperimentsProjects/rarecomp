@@ -8,15 +8,24 @@ import { findUserByEmail, userExists, createUserRecord, recordLogin } from '@/li
 import { verifyPassword } from '@/lib/auth-crypto';
 import { dbReady } from '@/db/schema-ddl';
 
-export async function GET() { await dbReady();
-  const user = await getUser();
-  return NextResponse.json({ user });
+export async function GET() {
+  try {
+    const readiness = await dbReady();
+    if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
+    const user = await getUser();
+    return NextResponse.json({ user });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
+  }
 }
 
-export async function POST(req: Request) { await dbReady();
+export async function POST(req: Request) {
   if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
-  const meta = { ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '', userAgent: req.headers.get('user-agent') || '' };
   try {
+    const readiness = await dbReady();
+    if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
+    
+    const meta = { ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '', userAgent: req.headers.get('user-agent') || '' };
     const { mode, name, email, password } = await req.json();
     if (typeof email !== 'string' || !/^\S+@\S+\.\S+$/.test(email) || typeof password !== 'string' || password.length < 8 || password.length > 128)
       return NextResponse.json({ error: 'Enter a valid email and a password of at least 8 characters.' }, { status: 400 });
@@ -40,22 +49,25 @@ export async function POST(req: Request) { await dbReady();
     const token = await createUserSession(user.id, req);
     return NextResponse.json({ success: true, token });
   } catch (e) {
-    const message = e instanceof Error ? e.message : 'Unable to process your account. Please try again.';
-    console.error('User session error:', message);
-    // dbReady already yields environment-specific, actionable messages — surface them.
-    return NextResponse.json({ error: message }, { status: /DATABASE_URL|reach PostgreSQL|password/i.test(message) ? 503 : 500 });
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }
 }
 
-export async function DELETE(req: Request) { await dbReady();
-  if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
-  const jar = await cookies();
-  const token = jar.get('ep_user')?.value || req.headers.get('x-user-session') || undefined;
-  if (token && /^[a-f0-9]{64}$/i.test(token)) {
-    const [row] = await db.select().from(userSessions).where(eq(userSessions.token, tokenHash(token)));
-    if (row) await recordLogin(row.userId, '', 'logout');
-    await db.delete(userSessions).where(eq(userSessions.token, tokenHash(token)));
+export async function DELETE(req: Request) {
+  try {
+    const readiness = await dbReady();
+    if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
+    if (!sameOrigin(req)) return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
+    const jar = await cookies();
+    const token = jar.get('ep_user')?.value || req.headers.get('x-user-session') || undefined;
+    if (token && /^[a-f0-9]{64}$/i.test(token)) {
+      const [row] = await db.select().from(userSessions).where(eq(userSessions.token, tokenHash(token)));
+      if (row) await recordLogin(row.userId, '', 'logout');
+      await db.delete(userSessions).where(eq(userSessions.token, tokenHash(token)));
+    }
+    jar.delete('ep_user');
+    return NextResponse.json({ success: true });
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }
-  jar.delete('ep_user');
-  return NextResponse.json({ success: true });
 }
