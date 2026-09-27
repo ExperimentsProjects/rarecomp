@@ -5,6 +5,7 @@ import path from 'path';
 import { randomUUID } from 'crypto';
 
 const EXT: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' };
+const MAX_IMAGE_SIZE = 4 * 1024 * 1024; // stay below Vercel's ~4.5 MB body limit
 
 /**
  * Dual-mode upload:
@@ -17,8 +18,8 @@ export async function POST(req: Request) {
   try {
     const form = await req.formData();
     const file = form.get('file');
-    if (!(file instanceof File) || file.size > 5 * 1024 * 1024)
-      return NextResponse.json({ error: 'Choose an image smaller than 5 MB.' }, { status: 400 });
+    if (!(file instanceof File) || file.size > MAX_IMAGE_SIZE)
+      return NextResponse.json({ error: 'Choose an image smaller than 4 MB for Vercel uploads.' }, { status: 400 });
     const ext = EXT[file.type];
     if (!ext) return NextResponse.json({ error: 'Only JPG, PNG, WebP, and GIF images are supported.' }, { status: 400 });
 

@@ -34,6 +34,8 @@ export default function AdminPanel() {
   const [userSource, setUserSource] = useState<'mongodb' | 'postgres'>('postgres');
   const [rzpTesting, setRzpTesting] = useState(false);
   const [rzpResult, setRzpResult] = useState<{ ok: boolean; message?: string; error?: string; mode?: string } | null>(null);
+  const [blobTesting, setBlobTesting] = useState(false);
+  const [blobResult, setBlobResult] = useState<{ ok?: boolean; configured?: boolean; message?: string; error?: string; urlHost?: string } | null>(null);
   const [settings, setSettings] = useState<AdminSettings | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -427,6 +429,21 @@ export default function AdminPanel() {
       setRzpResult({ ok: false, error: e instanceof Error ? e.message : 'Test failed.' });
     } finally {
       setRzpTesting(false);
+    }
+  };
+
+  const testBlob = async () => {
+    setBlobTesting(true);
+    setBlobResult(null);
+    try {
+      const r = await fetch('/api/admin/blob-test', { method: 'POST' });
+      const data = await r.json();
+      if (!r.ok) throw Error(data.message || data.error || 'Blob test failed.');
+      setBlobResult(data);
+    } catch (e) {
+      setBlobResult({ ok: false, error: e instanceof Error ? e.message : 'Blob test failed.' });
+    } finally {
+      setBlobTesting(false);
     }
   };
 
@@ -1287,13 +1304,24 @@ export default function AdminPanel() {
                     {busy ? <Loader2 size={15} className="spin" /> : <Check size={15} />} Save store settings
                   </button>
                  </form>
-                <button type="button" className="button button-secondary rzp-test-btn" onClick={testRazorpay} disabled={rzpTesting}>
-                  {rzpTesting ? <Loader2 size={15} className="spin" /> : <ShieldCheck size={15} />} Test Razorpay credentials
-                </button>
+                <div className="settings-test-grid">
+                  <button type="button" className="button button-secondary rzp-test-btn" onClick={testRazorpay} disabled={rzpTesting}>
+                    {rzpTesting ? <Loader2 size={15} className="spin" /> : <ShieldCheck size={15} />} Test Razorpay credentials
+                  </button>
+                  <button type="button" className="button button-secondary rzp-test-btn" onClick={testBlob} disabled={blobTesting}>
+                    {blobTesting ? <Loader2 size={15} className="spin" /> : <ImagePlus size={15} />} Test Blob uploads
+                  </button>
+                </div>
                 {rzpResult && (
                   <p className={'rzp-result ' + (rzpResult.ok ? 'rzp-ok' : 'rzp-bad')}>
                     {rzpResult.ok ? <CheckCircle2 size={14} /> : <X size={14} />}
                     {rzpResult.ok ? rzpResult.message : rzpResult.error}
+                  </p>
+                )}
+                {blobResult && (
+                  <p className={'rzp-result ' + (blobResult.ok ? 'rzp-ok' : 'rzp-bad')}>
+                    {blobResult.ok ? <CheckCircle2 size={14} /> : <X size={14} />}
+                    {blobResult.ok ? `${blobResult.message} (${blobResult.urlHost})` : blobResult.error || blobResult.message}
                   </p>
                 )}
               </section>
