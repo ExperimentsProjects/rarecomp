@@ -45,8 +45,9 @@ export async function POST(req: Request) {
 
           const blob = await put(filename, file, { access: 'private', contentType: file.type, token });
           return NextResponse.json({
-            url: `/api/blob?pathname=${encodeURIComponent(blob.pathname)}`,
+            url: `/api/blob?url=${encodeURIComponent(blob.url)}`,
             mode: 'private',
+            urlRaw: blob.url,
             pathname: blob.pathname,
           });
         }

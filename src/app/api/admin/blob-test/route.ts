@@ -41,9 +41,19 @@ export async function POST(req: Request) {
           token,
           addRandomSuffix: false,
         });
-        // private blobs are deleted by pathname
-        await del(blob.pathname, { token }).catch(() => {});
-        return NextResponse.json({ ok: true, configured: true, mode: 'private', message: 'Vercel Blob store is private; uploads will be served through /api/blob automatically.', urlHost: 'served-via-site-proxy' });
+
+        // Test if the delivery proxy works
+        const testUrl = `${new URL(req.url).origin}/api/blob?url=${encodeURIComponent(blob.url)}`;
+        const testRes = await fetch(testUrl);
+        const testText = await testRes.text();
+
+        await del(blob.url, { token }).catch(() => {});
+
+        if (testRes.ok && testText === 'ok') {
+          return NextResponse.json({ ok: true, configured: true, mode: 'private', message: 'Vercel Blob store is private; delivery proxy verified successfully.', urlHost: new URL(blob.url).host });
+        } else {
+          return NextResponse.json({ ok: false, configured: true, mode: 'private', message: `Blob is private, but the delivery proxy failed: ${testRes.status} ${testText}` }, { status: 503 });
+        }
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
