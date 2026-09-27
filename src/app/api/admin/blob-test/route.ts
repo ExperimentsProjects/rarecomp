@@ -20,14 +20,31 @@ export async function POST(req: Request) {
 
     try {
       const { put, del } = await import('@vercel/blob');
-      const blob = await put(`health/blob-check-${Date.now()}.txt`, new Blob(['ok'], { type: 'text/plain' }), {
-        access: 'public',
-        contentType: 'text/plain',
-        token,
-        addRandomSuffix: false,
-      });
-      await del(blob.url, { token }).catch(() => {});
-      return NextResponse.json({ ok: true, configured: true, message: 'Vercel Blob is connected and writable for this project.', urlHost: new URL(blob.url).host });
+      const pathname = `health/blob-check-${Date.now()}.txt`;
+      try {
+        const blob = await put(pathname, new Blob(['ok'], { type: 'text/plain' }), {
+          access: 'public',
+          contentType: 'text/plain',
+          token,
+          addRandomSuffix: false,
+        });
+        await del(blob.url, { token }).catch(() => {});
+        return NextResponse.json({ ok: true, configured: true, mode: 'public', message: 'Vercel Blob is connected and writable for this project.', urlHost: new URL(blob.url).host });
+      } catch (publicErr) {
+        const msg = publicErr instanceof Error ? publicErr.message : String(publicErr);
+        if (!/private store/i.test(msg)) {
+          return NextResponse.json({ ok: false, configured: true, message: `Blob token exists but upload failed: ${msg}` }, { status: 503 });
+        }
+        const blob = await put(pathname, new Blob(['ok'], { type: 'text/plain' }), {
+          access: 'private',
+          contentType: 'text/plain',
+          token,
+          addRandomSuffix: false,
+        });
+        // private blobs are deleted by pathname
+        await del(blob.pathname, { token }).catch(() => {});
+        return NextResponse.json({ ok: true, configured: true, mode: 'private', message: 'Vercel Blob store is private; uploads will be served through /api/blob automatically.', urlHost: 'served-via-site-proxy' });
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       return NextResponse.json({ ok: false, configured: true, message: `Blob token exists but upload failed: ${msg}` }, { status: 503 });

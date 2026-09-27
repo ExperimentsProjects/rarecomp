@@ -59,6 +59,10 @@ Create a PostgreSQL database in Neon, Supabase, or Vercel Marketplace. Copy the 
 
 In Vercel project → Storage → Blob → Connect. Vercel creates `BLOB_READ_WRITE_TOKEN` automatically. Runtime admin image uploads use Blob; static images under `public/` require no setup.
 
+The app supports **public or private Blob stores**:
+- **Public store:** uploaded product images use the returned CDN URL directly.
+- **Private store:** if Vercel reports "Cannot use public access on a private store", this app automatically retries the upload as private and stores an internal URL like `/api/blob?pathname=...`. No manual changes are required.
+
 ### MongoDB Atlas
 
 Use your Atlas connection string with database name `experiments_projects`. For Vercel's dynamic server IPs, Atlas Network Access must permit the Vercel deployment (the preview setup currently uses `0.0.0.0/0`; restrict it when moving to fixed-egress production hosting).

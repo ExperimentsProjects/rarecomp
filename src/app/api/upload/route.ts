@@ -30,8 +30,26 @@ export async function POST(req: Request) {
       try {
         const { put } = await import('@vercel/blob');
         const filename = `products/${randomUUID()}.${ext}`;
-        const blob = await put(filename, file, { access: 'public', contentType: file.type, token });
-        return NextResponse.json({ url: blob.url });
+
+        // Try public first (fast CDN URL). If the store itself is private,
+        // Vercel throws a specific error — retry as private and return our
+        // /api/blob delivery route instead.
+        try {
+          const blob = await put(filename, file, { access: 'public', contentType: file.type, token });
+          return NextResponse.json({ url: blob.url, mode: 'public' });
+        } catch (publicErr) {
+          const message = publicErr instanceof Error ? publicErr.message : String(publicErr);
+          if (!/private store/i.test(message)) {
+            return NextResponse.json({ error: `Vercel Blob upload failed: ${message}` }, { status: 500 });
+          }
+
+          const blob = await put(filename, file, { access: 'private', contentType: file.type, token });
+          return NextResponse.json({
+            url: `/api/blob?pathname=${encodeURIComponent(blob.pathname)}`,
+            mode: 'private',
+            pathname: blob.pathname,
+          });
+        }
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
         return NextResponse.json({ error: `Vercel Blob upload failed: ${message}` }, { status: 500 });

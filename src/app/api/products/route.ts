@@ -78,7 +78,7 @@ export async function POST(req: Request) {
       !CATEGORIES.includes(data.category)
     ) return NextResponse.json({ error: 'Please provide a name, description, category, and valid price.' }, { status: 400 });
 
-    if (data.image && !(data.image.startsWith('/api/media/') || data.image.startsWith('/products/') || /^https?:\/\//.test(data.image)))
+    if (data.image && !(data.image.startsWith('/api/media/') || data.image.startsWith('/api/blob?') || data.image.startsWith('/products/') || /^https?:\/\//.test(data.image)))
       return NextResponse.json({ error: 'Use an image upload or a valid http(s) image URL.' }, { status: 400 });
 
     let sectionId: string | null = null;
