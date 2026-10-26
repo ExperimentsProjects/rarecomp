@@ -29,7 +29,7 @@ const CONTENT: Record<PolicySlug, { lead: string; blocks: Block[] }> = {
         'Every product page lists exactly what is in the box, the operating limits, and the compatibility notes, so you know what you are buying before you pay.',
       ]},
       { icon: 'card', title: 'Payments & trust', body: [
-        'All payments are processed through Razorpay, an RBI-authorised Payment Aggregator that is PCI DSS Level 1 certified. We accept UPI, credit and debit cards, net-banking and wallets. Your card details never reach our servers.',
+        'All payments are processed through PayU, a PCI DSS compliant Payment Aggregator. We accept UPI, credit and debit cards, net-banking and wallets. Your card details never reach our servers.',
         'Customer reviews on this site are written by real registered accounts. Reviews from customers with a confirmed paid order carry a Verified purchase badge.',
       ]},
       { icon: 'building', title: 'Legal & business details', body: [
@@ -47,7 +47,7 @@ const CONTENT: Record<PolicySlug, { lead: string; blocks: Block[] }> = {
       { icon: 'mail', title: 'Email', body: ['electricalandelectronics64@gmail.com', 'Replies within 24 business hours. Include your EXP- order ID for anything order-related so we can pull up payment and shipping status instantly.'] },
       { icon: 'user', title: 'Phone & WhatsApp', body: ['+91 86393 96238', 'Monday – Saturday · 10:00 AM – 7:00 PM IST. Sundays and public holidays excluded.'] },
       { icon: 'box', title: 'Order, payment & shipping support', body: ['Open My Orders for live payment confirmation and shipping status at every stage: Order placed → Packed → Shipped → Out for delivery → Delivered. If your tracking has not updated for 48 hours, message us and we will raise it with the courier.'] },
-      { icon: 'card', title: 'Payment escalations', body: ['For payment failures, double debits or refund escalations you can also contact Razorpay Support directly at razorpay.com/support. Have your payment ID or order ID ready.'] },
+      { icon: 'card', title: 'Payment escalations', body: ['For payment failures, double debits or refund escalations you can also contact PayU Support directly at payu.in. Have your payment ID or order ID ready.'] },
       { icon: 'scale', title: 'Grievance Officer', body: [
         'Under the Consumer Protection (E-Commerce) Rules, 2020, any consumer complaint can be escalated to our Grievance Officer.',
         'Grievance Officer: RAJU',
@@ -72,11 +72,11 @@ const CONTENT: Record<PolicySlug, { lead: string; blocks: Block[] }> = {
         'Orders placed after 4:00 PM IST, or on Sundays and public holidays, are processed the next business day.',
         'Digital components and downloadable files are delivered instantly — the download unlocks in My Orders the moment payment succeeds.',
       ]},
-      { icon: 'card', title: 'How payment works (Razorpay)', body: [
-        'Checkout is processed by Razorpay, an RBI-authorised Payment Aggregator holding PCI DSS Level 1 certification — the highest security standard in the payments industry.',
+      { icon: 'card', title: 'How payment works (PayU)', body: [
+        'Checkout is processed by PayU, a PCI DSS compliant Payment Aggregator with industry-standard encryption.',
         'Accepted methods: UPI (GPay, PhonePe, Paytm, BHIM), credit and debit cards (Visa, Mastercard, RuPay, Amex), net-banking (50+ Indian banks) and wallets (Paytm, PhonePe, Amazon Pay, Mobikwik).',
         'Card details are tokenised at the point of entry and never reach our servers. We never see or store your card number, CVV, expiry, UPI PIN or OTP.',
-        'Your order is confirmed automatically the moment Razorpay verifies the payment. If the payment window closes, your order stays saved as “payment pending” in My Orders and can be retried.',
+        'Your order is confirmed automatically the moment PayU verifies the payment. If the payment window closes, your order stays saved as “payment pending” in My Orders and can be retried.',
       ]},
       { icon: 'box', title: 'Live shipping updates', body: ['Track every stage in My Orders. Once dispatched, we add the courier partner name and a direct tracking link. Digital-only orders show delivery status as instant download.'] },
       { icon: 'alert', title: 'Delays beyond our control', body: ['During sales, festivals, monsoon disruption, strikes or courier network congestion, dispatch and delivery may take longer. We will keep the shipping status updated in My Orders and notify you if there is a material delay.'] },
@@ -124,21 +124,21 @@ const CONTENT: Record<PolicySlug, { lead: string; blocks: Block[] }> = {
   },
 
   'refund-policy': {
-    lead: 'Refunds are always returned to your original payment method through Razorpay. This page states the exact timelines per payment method, as required by Razorpay and the Consumer Protection (E-Commerce) Rules, 2020.',
+    lead: 'Refunds are always returned to your original payment method through PayU. This page states the exact timelines per payment method, as required by the Consumer Protection (E-Commerce) Rules, 2020.',
     blocks: [
       { icon: 'card', title: 'Refund to source — a banking requirement', body: [
-        'Refunds can only be credited back to the exact account, card, UPI ID or wallet that was used to pay. This is enforced by the banking and card networks and by Razorpay.',
+        'Refunds can only be credited back to the exact account, card, UPI ID or wallet that was used to pay. This is enforced by the banking and card networks and by PayU.',
         'We cannot redirect a refund to a different bank account, a different UPI ID, another person, or pay it as cash or bank transfer. Please do not request this — we will have to decline.',
       ]},
       { icon: 'return', title: 'When a refund is approved', body: [
         'Order cancelled before dispatch: full refund, approved immediately.',
         'Approved return received and inspected: full refund, approved within 1–2 business days of the returned part passing inspection.',
         'Damaged, defective or wrong item with a valid unboxing video: full refund or free replacement, your choice.',
-        'Payment debited but order not created (failed transaction): auto-reversed by Razorpay; see the failed-payment section below.',
+        'Payment debited but order not created (failed transaction): auto-reversed by PayU; see the failed-payment section below.',
         'Digital downloads already delivered: not refundable, since the files cannot be returned.',
       ]},
       { icon: 'clock', title: 'Refund timelines by payment method', body: [
-        'We initiate every approved refund through Razorpay within 1–2 business days. After initiation, the arrival time depends on how you paid:',
+        'We initiate every approved refund through PayU within 1–2 business days. After initiation, the arrival time depends on how you paid:',
       ], table: {
         head: ['Payment method', 'Refund reaches you in'],
         rows: [
@@ -149,28 +149,28 @@ const CONTENT: Record<PolicySlug, { lead: string; blocks: Block[] }> = {
           ['EMI / PayLater', '30–180 working days (bank-dependent)'],
         ],
       }},
-      { icon: 'info', title: 'Working days', body: ['Working days exclude Saturdays, Sundays and bank holidays. If a refund has not appeared after 10 working days from initiation, contact us with your order ID and we will trace it with Razorpay and your bank.'] },
+      { icon: 'info', title: 'Working days', body: ['Working days exclude Saturdays, Sundays and bank holidays. If a refund has not appeared after 10 working days from initiation, contact us with your order ID and we will trace it with PayU and your bank.'] },
       { icon: 'alert', title: 'Failed payment but money debited', body: [
-        'This happens occasionally with UPI and net-banking and resolves itself: if the transaction failed but the amount was debited, Razorpay auto-reverses it, typically within 5–7 working days.',
-        'Do not retry the payment repeatedly. If the amount has not returned after 7 working days, contact us with your order ID and payment ID and we will escalate with Razorpay.',
+        'This happens occasionally with UPI and net-banking and resolves itself: if the transaction failed but the amount was debited, PayU auto-reverses it, typically within 5–7 working days.',
+        'Do not retry the payment repeatedly. If the amount has not returned after 7 working days, contact us with your order ID and payment ID and we will escalate with PayU.',
       ]},
       { icon: 'return', title: 'Cancellation', body: [
         'You can cancel free of charge any time before dispatch — email us with your order ID. After dispatch the order cannot be cancelled; the return process above applies instead.',
         'Orders already dispatched cannot be cancelled because the parcel is in the courier network.',
       ]},
       { icon: 'file', title: 'Gateway charges', body: [
-        'Per Razorpay’s standard practice, payment gateway fees on the original transaction are not returned to us and are deducted from the refund amount where applicable. The refund amount will be shown to you before you confirm a refund request.',
+        'Per PayU’s standard practice, payment gateway fees on the original transaction are not returned to us and are deducted from the refund amount where applicable. The refund amount will be shown to you before you confirm a refund request.',
       ]},
-      { icon: 'mail', title: 'Refund questions', body: ['Email electricalandelectronics64@gmail.com or call/WhatsApp +91 86393 96238 with your EXP- order ID. Payment escalations can also be raised directly at razorpay.com/support.'] },
+      { icon: 'mail', title: 'Refund questions', body: ['Email electricalandelectronics64@gmail.com or call/WhatsApp +91 86393 96238 with your EXP- order ID. Payment escalations can also be raised directly at payu.in.'] },
     ],
   },
 
   privacy: {
-    lead: 'This policy explains exactly what data we collect, why, how long we keep it, and how payments are handled by Razorpay. We keep it short and honest — no legal fog.',
+    lead: 'This policy explains exactly what data we collect, why, how long we keep it, and how payments are handled by PayU. We keep it short and honest — no legal fog.',
     blocks: [
       { icon: 'building', title: 'Who is responsible for your data', body: [
         'Experiments_Projects is the data controller for your account and order information.',
-        'Razorpay Software Private Limited acts as the processor for all payment data, under its own privacy policy at razorpay.com/privacy.',
+        'PayU acts as the processor for all payment data, under its own privacy policy at payu.in.',
       ]},
       { icon: 'box', title: 'What we collect', body: [
         'Account: your name, email address, and a salted password hash. We can never see or recover your actual password.',
@@ -180,9 +180,9 @@ const CONTENT: Record<PolicySlug, { lead: string; blocks: Block[] }> = {
         'Newsletter: your email address, only if you subscribe.',
       ]},
       { icon: 'card', title: 'What we never see — payments', body: [
-        'When you pay, you are moved to Razorpay’s secure checkout. We never receive or store your card number, CVV, expiry date, UPI PIN, OTP or net-banking credentials.',
-        'Razorpay is an RBI-authorised Payment Aggregator holding PCI DSS Level 1 certification. Card data is tokenised at the point of entry and protected by 3-D Secure and AI-based fraud detection.',
-        'We store only the payment outcome: a Razorpay payment ID, the amount, and whether it succeeded. That is what lets us show your order as “Paid” and unlock downloads.',
+        'When you pay, you are moved to PayU’s secure checkout. We never receive or store your card number, CVV, expiry date, UPI PIN, OTP or net-banking credentials.',
+        'PayU is a PCI DSS compliant Payment Aggregator. Card data is tokenised at the point of entry and protected by 3-D Secure and fraud screening.',
+        'We store only the payment outcome: a PayU payment ID, the amount, and whether it succeeded. That is what lets us show your order as “Paid” and unlock downloads.',
       ]},
       { icon: 'lock', title: 'How your data is protected', body: [
         'Passwords are hashed with scrypt and a per-user salt — never stored in readable form.',
@@ -198,7 +198,7 @@ const CONTENT: Record<PolicySlug, { lead: string; blocks: Block[] }> = {
         'Transactional emails — order confirmation, shipping, payment receipts — are essential and are sent only for orders you placed.',
       ]},
       { icon: 'users', title: 'Third parties we rely on', body: [
-        'Razorpay — payment processing, refunds and fraud screening.',
+        'PayU — payment processing, refunds and fraud screening.',
         'Courier partners — delivery of physical orders; they receive your name, address and phone for delivery only.',
         'MongoDB Atlas and managed database hosting — secure data storage.',
         'No other third party receives your personal data.',
@@ -213,7 +213,7 @@ const CONTENT: Record<PolicySlug, { lead: string; blocks: Block[] }> = {
       ]},
       { icon: 'scale', title: 'Grievance & contact', body: [
         'Any question, concern or request about your data: electricalandelectronics64@gmail.com or +91 86393 96238.',
-        'Payment-specific queries can also be raised with Razorpay Support at razorpay.com/support.',
+        'Payment-specific queries can also be raised with PayU Support at payu.in.',
       ]},
     ],
   },
@@ -239,7 +239,7 @@ const CONTENT: Record<PolicySlug, { lead: string; blocks: Block[] }> = {
         'Product images are representative. Minor cosmetic differences in silkscreen, labelling, colour or batch marking may exist between the image and the item you receive. Such differences do not constitute a defect and are not grounds for return.',
       ]},
       { icon: 'box', title: 'Availability & pricing', body: [
-        'Stock levels and prices in Indian Rupees can change without notice due to component market volatility. An order is only confirmed once payment is verified by Razorpay. If a component goes out of stock after you paid, we will offer a replacement, store credit or a full refund.',
+        'Stock levels and prices in Indian Rupees can change without notice due to component market volatility. An order is only confirmed once payment is verified by PayU. If a component goes out of stock after you paid, we will offer a replacement, store credit or a full refund.',
       ]},
       { icon: 'shield', title: 'Limitation of liability', body: [
         'To the maximum extent permitted by Indian law, our total liability for any claim relating to a product or order is limited to the amount you paid for that product. Nothing in this disclaimer excludes liability that cannot be excluded under the Consumer Protection Act, 2019 or other applicable Indian law.',
@@ -251,7 +251,7 @@ const CONTENT: Record<PolicySlug, { lead: string; blocks: Block[] }> = {
   },
 
   terms: {
-    lead: 'By using this website or placing an order you agree to these terms. They are written to comply with the Consumer Protection (E-Commerce) Rules, 2020 and Razorpay’s marketplace requirements.',
+    lead: 'By using this website or placing an order you agree to these terms. They are written to comply with the Consumer Protection (E-Commerce) Rules, 2020 and PayU’s marketplace requirements.',
     blocks: [
       { icon: 'info', title: 'Using the store', body: [
         'You must provide accurate account and delivery details. You are responsible for keeping your password confidential; we will never ask for it by email or phone.',
@@ -259,7 +259,7 @@ const CONTENT: Record<PolicySlug, { lead: string; blocks: Block[] }> = {
       ]},
       { icon: 'card', title: 'Orders, pricing & payment', body: [
         'All prices are in Indian Rupees (₹) and are inclusive of applicable taxes unless stated otherwise on the product page.',
-        'An order becomes a confirmed contract once Razorpay verifies your payment. Until then the order is saved as “payment pending”.',
+        'An order becomes a confirmed contract once PayU verifies your payment. Until then the order is saved as “payment pending”.',
         'We may cancel and fully refund an order if a component is out of stock, if the item was mispriced due to a technical error, or if we detect fraudulent or abusive ordering. You will be notified and refunded in full.',
       ]},
       { icon: 'box', title: 'Delivery & risk', body: [
@@ -312,7 +312,7 @@ export default function PolicyPage({ slug }: { slug: PolicySlug }) {
       </header>
 
       <main className="policy-card">
-        <span className="eyebrow">EXPERIMENTS_PROJECTS · INDIA · SECURED BY RAZORPAY</span>
+        <span className="eyebrow">EXPERIMENTS_PROJECTS · INDIA · SECURED BY PAYU</span>
         <h1>{title}</h1>
         <p className="policy-updated">Last updated: {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
         <p className="policy-lead" dangerouslySetInnerHTML={{ __html: page.lead.replace(/electricalandelectronics64@gmail\.com/g, '<a href="mailto:$&">$&</a>').replace(/\+91 86393 96238/g, `<a href="${telHref}">$&</a>`) }} />
@@ -330,7 +330,7 @@ export default function PolicyPage({ slug }: { slug: PolicySlug }) {
                       __html: paragraph
                         .replace(/electricalandelectronics64@gmail\.com/g, '<a href="mailto:$&">$&</a>')
                         .replace(/\+91 86393 96238/g, `<a href="${telHref}">$&</a>`)
-                        .replace(/razorpay\.com\/([a-z/]+)/g, '<a href="https://razorpay.com/$1" target="_blank" rel="noopener noreferrer">razorpay.com/$1</a>'),
+                        .replace(/payu\.in\/?/g, '<a href="https://payu.in" target="_blank" rel="noopener noreferrer">payu.in</a>'),
                     }} />
                   ))}
                   {block.table && (
@@ -347,7 +347,7 @@ export default function PolicyPage({ slug }: { slug: PolicySlug }) {
 
         <div className="policy-note">
           <b>Questions about this page?</b> Email <a href={'mailto:' + email}>{email}</a> or call <a href={telHref}>{phone}</a> (Mon–Sat, 10:00 AM – 7:00 PM IST).
-          Payment and refund escalations can also be raised with <a href="https://razorpay.com/support/" target="_blank" rel="noopener noreferrer">Razorpay Support</a>.
+          Payment and refund escalations can also be raised with <a href="https://payu.in" target="_blank" rel="noopener noreferrer">PayU Support</a>.
         </div>
 
         <footer className="policy-foot">
@@ -357,7 +357,7 @@ export default function PolicyPage({ slug }: { slug: PolicySlug }) {
           ))}
         </footer>
       </main>
-      <p className="standalone-footnote">© {new Date().getFullYear()} Experiments_Projects · Payments secured by Razorpay (PCI DSS Level 1) · Made in India</p>
+      <p className="standalone-footnote">© {new Date().getFullYear()} Experiments_Projects · Payments secured by PayU (PCI DSS compliant) · Made in India</p>
     </div>
   );
 }

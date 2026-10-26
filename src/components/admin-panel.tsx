@@ -10,7 +10,7 @@ import { patchFetchWithSessionTokens, saveSessionToken, clearSessionToken, captu
 import Modal from './modal';
 
 type ProductView = Product & { ratingAvg?: number; ratingCount?: number };
-type AdminSettings = Record<'razorpay_enabled' | 'razorpay_key_id' | 'razorpay_key_secret' | 'payu_enabled' | 'payu_merchant_key' | 'payu_merchant_salt' | 'payu_mode' | 'contact_email' | 'contact_phone' | 'instagram_url' | 'youtube_url' | 'x_url', string>;
+type AdminSettings = Record<'payu_enabled' | 'payu_merchant_key' | 'payu_merchant_salt' | 'payu_mode' | 'contact_email' | 'contact_phone' | 'instagram_url' | 'youtube_url' | 'x_url', string>;
 type Tab = 'overview' | 'sections' | 'products' | 'orders' | 'users' | 'reviews' | 'subscribers' | 'settings';
 type Subscriber = { email: string; createdAt: string };
 type AdminUser = { id: string; name: string; email: string; createdAt: string; lastLoginAt: string | null; loginCount: number; orderCount: number; paidOrders: number; totalSpentPaise: number };
@@ -395,9 +395,6 @@ export default function AdminPanel() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          razorpay_enabled: form.get('rzp_enabled') === 'on' ? '1' : '0',
-          razorpay_key_id: form.get('rzp_key_id'),
-          razorpay_key_secret: form.get('rzp_key_secret'),
           payu_enabled: form.get('payu_enabled') === 'on' ? '1' : '0',
           payu_merchant_key: form.get('payu_merchant_key'),
           payu_merchant_salt: form.get('payu_merchant_salt'),
@@ -417,22 +414,6 @@ export default function AdminPanel() {
       setFormError(e instanceof Error ? e.message : 'Could not save settings.');
     } finally {
       setBusy(false);
-    }
-  };
-
-  const testRazorpay = async () => {
-    setRzpTesting(true);
-    setRzpResult(null);
-    try {
-      const r = await fetch('/api/admin/razorpay-test', { method: 'POST' });
-      const data = await r.json();
-      if (!r.ok) throw Error(data.error || 'Test failed.');
-      setRzpResult(data);
-      await loadData();
-    } catch (e) {
-      setRzpResult({ ok: false, error: e instanceof Error ? e.message : 'Test failed.' });
-    } finally {
-      setRzpTesting(false);
     }
   };
 
@@ -510,7 +491,7 @@ export default function AdminPanel() {
   const revenue = orders.filter((o) => o.status === 'paid').reduce((sum, o) => sum + o.total, 0);
   const pending = orders.filter((o) => o.status === 'pending').length;
   const inTransit = orders.filter((o) => ['packed', 'shipped', 'out_for_delivery'].includes(o.shipping)).length;
-  const rzpOn = settings?.razorpay_enabled === '1' && !!settings?.razorpay_key_id && !!settings?.razorpay_key_secret;
+  const payuOn = settings?.payu_enabled === '1' && !!settings?.payu_merchant_key && !!settings?.payu_merchant_salt;
 
   if (checking)
     return (
@@ -597,7 +578,7 @@ export default function AdminPanel() {
         <div className="sidebar-promo">
           <span>✦</span>
           <h3>Your store, fully in your hands.</h3>
-          <p>Sections, rare components, Razorpay, shipping — all configurable here.</p>
+          <p>Sections, rare components, PayU payments, shipping — all configurable here.</p>
           <button onClick={() => changeTab('sections')}>Create a new section <Plus size={13} /></button>
         </div>
         <div className="admin-sidebar-bottom">
@@ -629,8 +610,8 @@ export default function AdminPanel() {
             <span className="store-live">
               <i /> Store is live
             </span>
-            <span className={'rzp-status ' + (rzpOn ? 'rzp-on' : 'rzp-off')}>
-              <IndianRupee size={12} /> {rzpOn ? 'Razorpay ON' : 'Razorpay OFF'}
+            <span className={'rzp-status ' + (payuOn ? 'rzp-on' : 'rzp-off')}>
+              <IndianRupee size={12} /> {payuOn ? 'PayU ON' : 'PayU OFF'}
             </span>
             <button className="icon-button" aria-label="Refresh dashboard" onClick={loadData}>
               <RefreshCw size={16} className={reload ? 'spin' : ''} />
@@ -659,11 +640,11 @@ export default function AdminPanel() {
                 {tab === 'overview' && 'Sales, components, orders, and shipping — one calm dashboard.'}
                 {tab === 'sections' && 'Create storefront sections like “Rare Components” or “STEM Kits”. Products can be assigned to each section.'}
                 {tab === 'products' && 'Add images, descriptions, specs, prices in ₹, and download files. Only you can edit these.'}
-                {tab === 'orders' && 'Confirm Razorpay payments and update shipping (Packed → Shipped → Delivered). Customers see it instantly.'}
+                {tab === 'orders' && 'Confirm PayU payments and update shipping (Packed → Shipped → Delivered). Customers see it instantly.'}
                 {tab === 'users' && `Every registered customer with their orders, spend and login activity. Stored in ${userSource === 'mongodb' ? 'MongoDB' : 'PostgreSQL'}.`}
                 {tab === 'reviews' && 'Monitor and moderate reviews left by verified buyers.'}
                 {tab === 'subscribers' && 'Newsletter subscribers, exportable anytime.'}
-                {tab === 'settings' && 'Connect Razorpay for live ₹ payments, plus contact, social, and account security.'}
+                {tab === 'settings' && 'Connect PayU for live ₹ payments, plus contact, social, and account security.'}
               </p>
             </div>
             {(tab === 'overview' || tab === 'products') && (
@@ -750,7 +731,7 @@ export default function AdminPanel() {
                   </div>
                   {[
                     { done: true, name: 'Create your owner account', note: 'Your workspace is secure.' },
-                    { done: rzpOn, name: 'Enable Razorpay payments', note: rzpOn ? 'Live ₹ payments via UPI & cards.' : 'Add keys in Settings to accept UPI & cards.' },
+                    { done: payuOn, name: 'Enable PayU payments', note: payuOn ? 'Live ₹ payments via UPI & cards.' : 'Add keys in Settings to accept UPI & cards.' },
                     { done: sections.length > 1, name: 'Create custom sections', note: `${sections.length} section${sections.length !== 1 ? 's' : ''} on the storefront.` },
                     { done: products.some((p) => p.image), name: 'Add real product photos', note: 'Uploads appear instantly on the storefront.' },
                   ].map((s, i) => (
@@ -764,7 +745,7 @@ export default function AdminPanel() {
                     </button>
                   ))}
                   <p>
-                    <ShieldCheck size={13} /> All prices are in Indian Rupees (₹). Customers pay via Razorpay or invoice checkout.
+                    <ShieldCheck size={13} /> All prices are in Indian Rupees (₹). Customers pay via PayU or invoice checkout.
                   </p>
                 </section>
               </div>
@@ -926,11 +907,11 @@ export default function AdminPanel() {
               <div className="admin-invoice-banner">
                 <IndianRupee size={21} />
                 <div>
-                  <b>{rzpOn ? 'Razorpay live payments are ON.' : 'Payments: invoice mode (Razorpay OFF).'}</b>
+                  <b>{payuOn ? 'PayU live payments are ON.' : 'Payments: invoice mode (PayU OFF).'}</b>
                   <p>
-                    {rzpOn
-                      ? 'Paid orders auto-confirm via Razorpay. Update shipping below — customers watch it live in My Orders.'
-                      : 'Enable Razorpay in Settings to accept UPI & cards. Meanwhile, use “Mark paid” after manual payment confirmation.'}
+                    {payuOn
+                      ? 'Paid orders auto-confirm via PayU. Update shipping below — customers watch it live in My Orders.'
+                      : 'Enable PayU in Settings to accept UPI & cards. Meanwhile, use “Mark paid” after manual payment confirmation.'}
                   </p>
                 </div>
               </div>
@@ -1260,27 +1241,10 @@ export default function AdminPanel() {
             <div className="settings-grid settings-grid-wide">
               <section className="admin-panel settings-panel">
                 <div className="panel-heading">
-                  <h2>Razorpay payments (INR)</h2>
-                  <span className={'status ' + (rzpOn ? 'status-paid' : 'status-draft')}>{rzpOn ? 'Live' : 'Not enabled'}</span>
+                  <h2>PayU payments (INR)</h2>
+                  <span className={'status ' + (payuOn ? 'status-paid' : 'status-draft')}>{payuOn ? 'Live' : 'Not enabled'}</span>
                 </div>
                 <form className="admin-form" onSubmit={saveSettings}>
-                  <label className="checkbox-label settings-toggle">
-                    <input type="checkbox" name="rzp_enabled" defaultChecked={settings.razorpay_enabled === '1'} />
-                    <span>
-                      <b>Enable Razorpay checkout</b>
-                      <small>Customers pay via UPI, cards, net-banking & wallets. Orders auto-confirm as “Paid”.</small>
-                    </span>
-                  </label>
-                  <label>
-                    Razorpay Key ID
-                    <input name="rzp_key_id" placeholder="rzp_test_… or rzp_live_…" defaultValue={settings.razorpay_key_id} autoComplete="off" />
-                    <small>From Razorpay Dashboard → Settings → API Keys. Use test keys first.</small>
-                  </label>
-                  <label>
-                    Razorpay Key Secret
-                    <input name="rzp_key_secret" type="password" placeholder="Key secret (stored securely)" defaultValue={settings.razorpay_key_secret} autoComplete="new-password" />
-                    <small>Never shown publicly. Payments verify with an HMAC signature.</small>
-                  </label>
                   <h3 className="settings-subhead">Store contact & socials</h3>
                   <div className="form-row">
                     <label>
@@ -1337,9 +1301,6 @@ export default function AdminPanel() {
                   </button>
                 </form>
                 <div className="settings-test-grid">
-                  <button type="button" className="button button-secondary rzp-test-btn" onClick={testRazorpay} disabled={rzpTesting}>
-                    {rzpTesting ? <Loader2 size={15} className="spin" /> : <ShieldCheck size={15} />} Test Razorpay credentials
-                  </button>
                   <button type="button" className="button button-secondary rzp-test-btn" onClick={testBlob} disabled={blobTesting}>
                     {blobTesting ? <Loader2 size={15} className="spin" /> : <ImagePlus size={15} />} Test Blob uploads
                   </button>
@@ -1392,7 +1353,7 @@ export default function AdminPanel() {
                 </div>
                 {[
                   { name: 'PostgreSQL database', detail: 'Products, sections, orders, users & reviews.', status: 'Connected', on: true },
-                  { name: 'Razorpay (₹)', detail: 'Live UPI/card payments with signature verification.', status: rzpOn ? 'Live' : 'Configure keys', on: rzpOn },
+                  { name: 'PayU (₹)', detail: 'Live UPI/card payments with hash verification.', status: payuOn ? 'Live' : 'Configure keys', on: payuOn },
                   { name: 'PayU (₹)', detail: 'Live professional checkout via PayU PG.', status: settings?.payu_enabled === '1' && settings?.payu_merchant_key ? 'Connected' : 'Configure keys', on: settings?.payu_enabled === '1' && !!settings?.payu_merchant_key },
                   { name: 'Image storage', detail: 'Product images up to 5 MB (JPG/PNG/WebP/GIF).', status: 'Connected', on: true },
                   { name: 'Digital delivery', detail: 'Downloads unlock after payment confirms.', status: 'Connected', on: true },

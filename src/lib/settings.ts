@@ -3,9 +3,6 @@ import { dbReady } from '@/db/schema-ddl';
 import { settings } from '@/db/schema';
 
 const DEFAULTS: Record<string, string> = {
-  razorpay_enabled: '0',
-  razorpay_key_id: '',
-  razorpay_key_secret: '',
   payu_enabled: '1',
   payu_merchant_key: '2DgRi1',
   payu_merchant_salt: 'mV3eod8QkvrqscQrcbIfabzBjiswtsdm',
@@ -24,12 +21,10 @@ export const STORE_IDENTITY = {
   phone: '+91 8639396238',
   phoneDisplay: '+91 86393 96238',
   supportHours: 'Monday – Saturday · 10:00 AM – 7:00 PM IST',
-  payments: 'Razorpay · UPI, Credit/Debit Cards, Net-Banking, Wallets',
+  payments: 'PayU · UPI, Credit/Debit Cards, Net-Banking, Wallets',
 } as const;
 
 export type StoreSettings = {
-  razorpayEnabled: boolean;
-  razorpayKeyId: string;
   payuEnabled: boolean;
   contactEmail: string;
   contactPhone: string;
@@ -55,19 +50,9 @@ export async function getSetting(key: string) {
   return all[key] ?? DEFAULTS[key] ?? '';
 }
 
-export async function getRazorpayKeys() {
-  const keyId = process.env.RAZORPAY_KEY_ID || (await getSetting('razorpay_key_id'));
-  const keySecret = process.env.RAZORPAY_KEY_SECRET || (await getSetting('razorpay_key_secret'));
-  const enabledFlag = process.env.RAZORPAY_KEY_ID ? '1' : await getSetting('razorpay_enabled');
-  return { keyId, keySecret, enabled: enabledFlag === '1' && !!keyId && !!keySecret };
-}
-
 export async function getPublicSettings(): Promise<StoreSettings> {
-  const rzp = await getRazorpayKeys();
   const all = await loadAll();
   return {
-    razorpayEnabled: rzp.enabled,
-    razorpayKeyId: rzp.enabled ? rzp.keyId : '',
     payuEnabled: all.payu_enabled === '1' && !!all.payu_merchant_key && !!all.payu_merchant_salt,
     contactEmail: all.contact_email,
     contactPhone: all.contact_phone,
@@ -86,7 +71,7 @@ export async function updateSettings(adminUpdates: Record<string, unknown>) {
     if (typeof raw !== 'string' || raw.length > 500) continue;
     // Never allow secrets to be overwritten blindly with whitespace.
     const value = raw.trim();
-    if (key === 'razorpay_enabled' && !['0', '1'].includes(value)) continue;
+    if (key === 'payu_enabled' && !['0', '1'].includes(value)) continue;
     await db.insert(settings).values({ key, value }).onConflictDoUpdate({ target: settings.key, set: { value } });
   }
   cache = null;
@@ -95,9 +80,6 @@ export async function updateSettings(adminUpdates: Record<string, unknown>) {
 export async function getAdminSettings() {
   const all = await loadAll();
   return {
-    razorpay_enabled: all.razorpay_enabled,
-    razorpay_key_id: all.razorpay_key_id,
-    razorpay_key_secret: all.razorpay_key_secret,
     payu_enabled: all.payu_enabled,
     payu_merchant_key: all.payu_merchant_key,
     payu_merchant_salt: all.payu_merchant_salt,

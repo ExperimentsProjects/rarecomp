@@ -54,6 +54,22 @@ export const userSessions = pgTable('user_sessions', {
   expiresAt: timestamp('expires_at').notNull(),
 });
 
+export const addresses = pgTable('addresses', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  label: text('label').notNull().default('Home'),
+  fullName: text('full_name').notNull(),
+  phone: text('phone').notNull(),
+  line1: text('line1').notNull(),
+  line2: text('line2'),
+  city: text('city').notNull(),
+  state: text('state').notNull(),
+  pincode: text('pincode').notNull(),
+  country: text('country').notNull().default('India'),
+  isDefault: boolean('is_default').notNull().default(false),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 export const orders = pgTable('orders', {
   id: text('id').primaryKey(),
   token: text('token').notNull().unique(),

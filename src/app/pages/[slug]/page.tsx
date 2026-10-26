@@ -7,7 +7,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const title = isPolicySlug(slug) ? POLICY_TITLES[slug] : 'Page';
   return {
     title: `${title} — Experiments_Projects`,
-    description: `${title} for Experiments_Projects — electronic components store for builders in India. Payments secured by Razorpay.`,
+    description: `${title} for Experiments_Projects — electronic components store for builders in India. Payments secured by PayU.`,
   };
 }
 

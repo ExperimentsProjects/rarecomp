@@ -5,6 +5,7 @@ import { eq, and, desc, inArray } from 'drizzle-orm';
 import { getUser, getAdmin, sameOrigin } from '@/lib/auth';
 import { randomUUID } from 'crypto';
 import { dbReady } from '@/db/schema-ddl';
+import { rateLimit, clientKey } from '@/lib/rate-limit';
 
 async function hasPurchased(userId: string, productId: string) {
   const mine = await db.select({ items: orders.items, status: orders.status }).from(orders).where(eq(orders.userId, userId));
@@ -62,6 +63,11 @@ export async function POST(req: Request) {
 
     const user = await getUser();
     if (!user) return NextResponse.json({ error: 'Please sign in to share your review.' }, { status: 401 });
+
+    const limit = rateLimit(clientKey(req, 'review', user.id), 10, 60 * 60 * 1000);
+    if (!limit.ok) {
+      return NextResponse.json({ error: 'You have posted several reviews recently. Please try again later.' }, { status: 429 });
+    }
     
     const { productId, rating, title, comment } = await req.json();
     if (typeof productId !== 'string' || !Number.isInteger(rating) || rating < 1 || rating > 5 || typeof comment !== 'string' || comment.trim().length < 10 || comment.length > 1500)

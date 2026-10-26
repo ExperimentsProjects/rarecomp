@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s — Experiments_Projects",
   },
   description:
-    "Genuine electronic components, development boards, wireless RF modules, assembled devices and production source code. Priced in ₹ with secure Razorpay checkout — shipped across India.",
+    "Genuine electronic components, development boards, wireless RF modules, assembled devices and production source code. Priced in ₹ with secure PayU checkout — shipped across India.",
   keywords: ['ESP32', 'ESP32-S3', 'CC1101', 'nRF24L01', 'LoRa', 'electronics', 'India', 'IoT', 'components store'],
   icons: {
     icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],

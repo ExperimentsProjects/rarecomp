@@ -57,6 +57,21 @@ const DDL: string[] = [
     user_id text NOT NULL,
     expires_at timestamp NOT NULL
   )`,
+  `CREATE TABLE IF NOT EXISTS addresses (
+    id text PRIMARY KEY,
+    user_id text NOT NULL,
+    label text NOT NULL DEFAULT 'Home',
+    full_name text NOT NULL,
+    phone text NOT NULL,
+    line1 text NOT NULL,
+    line2 text,
+    city text NOT NULL,
+    state text NOT NULL,
+    pincode text NOT NULL,
+    country text NOT NULL DEFAULT 'India',
+    is_default boolean NOT NULL DEFAULT false,
+    created_at timestamp NOT NULL DEFAULT now()
+  )`,
   `CREATE TABLE IF NOT EXISTS orders (
     id text PRIMARY KEY,
     token text UNIQUE NOT NULL,
@@ -120,6 +135,29 @@ let ddlPromise: Promise<DbReadiness> | undefined;
  * whether to continue gracefully and let an inner try-catch produce
  * proper JSON responses.
  */
+/**
+ * Idempotent column additions.
+ * CREATE TABLE IF NOT EXISTS skips tables that already exist, so new columns
+ * added in later releases would never reach a live database. These statements
+ * are safe to run on every boot.
+ */
+const COLUMN_MIGRATIONS: string[] = [
+  `ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_fee integer NOT NULL DEFAULT 0`,
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS specs jsonb NOT NULL DEFAULT '[]'::jsonb`,
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS tags jsonb NOT NULL DEFAULT '[]'::jsonb`,
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS section_id text`,
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS image text`,
+  `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS title text`,
+  `ALTER TABLE reviews ADD COLUMN IF NOT EXISTS verified boolean NOT NULL DEFAULT false`,
+  `ALTER TABLE admins ADD COLUMN IF NOT EXISTS name text NOT NULL DEFAULT 'Owner'`,
+  `ALTER TABLE orders ADD COLUMN IF NOT EXISTS courier text`,
+  `ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_url text`,
+  `ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_updated_at timestamp`,
+  `ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_id text`,
+  `ALTER TABLE orders ADD COLUMN IF NOT EXISTS razorpay_order_id text`,
+  `ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_id text`,
+];
+
 export async function dbReady(): Promise<DbReadiness> {
   // Accept either Vercel-provided name so the Neon/Postgres integration always works.
   // Strip channel_binding param which can cause issues with some pg driver versions.
@@ -146,6 +184,7 @@ export async function dbReady(): Promise<DbReadiness> {
           idleTimeoutMillis: 5000,
         });
         for (const statement of DDL) await pool.query(statement);
+        for (const statement of COLUMN_MIGRATIONS) await pool.query(statement).catch(() => {});
         return { ok: true };
       } catch (e) {
         ddlPromise = undefined; // retry on next request

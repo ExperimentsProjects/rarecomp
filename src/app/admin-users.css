@@ -1,4 +1,4 @@
-/* Users panel + Razorpay test */
+/* Users panel + PayU test */
 .rzp-test-btn{margin:0 22px 18px;width:calc(100% - 44px)}
 .rzp-result{display:flex;gap:9px;align-items:flex-start;margin:0 22px 20px;padding:13px 15px;border-radius:9px;font-size:11px;line-height:1.7}
 .rzp-ok{background:#bfe38d12;border:1px solid #83ac4f66;color:#cdefa6}

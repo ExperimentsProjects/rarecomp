@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, ArrowUpRight, Search, ShoppingBag, ChevronDown, Check, Heart, X, SlidersHorizontal, Grid2X2, Box, Sparkles, Code2, ShieldCheck, Download, ExternalLink, Plus, Menu, UserRound, Star, CheckCircle2, Loader2, Trash2, Copy, Mail, Phone, RefreshCw, Package, Truck } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Search, ShoppingBag, MapPin, ChevronDown, Check, Heart, X, SlidersHorizontal, Grid2X2, Box, Sparkles, Code2, ShieldCheck, Download, ExternalLink, Plus, Menu, UserRound, Star, CheckCircle2, Loader2, Trash2, Copy, Mail, Phone, RefreshCw, Package, Truck } from 'lucide-react';
 import type { Product, Order, Review, Section } from '@/db/schema';
 import type { StoreSettings } from '@/lib/settings';
 import { formatINR, isDigital } from '@/lib/money';
@@ -11,14 +11,9 @@ import { useIsAdmin } from './use-admin';
 import { useTilt } from './use-tilt';
 import { patchFetchWithSessionTokens } from './session-token';
 import { ProductReviews, RecentReviews } from './reviews';
+import AddressBook, { type SavedAddress } from './address-book';
 import Hero3D from './hero-3d';
 import Modal from './modal';
-
-declare global {
-  interface Window {
-    Razorpay?: new (opts: Record<string, unknown>) => { open: () => void };
-  }
-}
 
 type ProductView = Product & { ratingAvg?: number; ratingCount?: number; hasSource?: boolean };
 type Dialog = 'cart' | 'checkout' | 'search' | null;
@@ -52,17 +47,6 @@ function StarsRow({ value, size = 13, onChange }: { value: number; size?: number
   );
 }
 
-async function loadRazorpayScript(): Promise<boolean> {
-  if (window.Razorpay) return true;
-  return new Promise((resolve) => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.head.appendChild(script);
-  });
-}
-
 export default function Storefront() {
   const router = useRouter();
   const isAdmin = useIsAdmin();
@@ -88,6 +72,7 @@ export default function Storefront() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [onlySaved, setOnlySaved] = useState(false);
+  const [savedAddressId, setSavedAddressId] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const notify = useCallback((message: string) => {
@@ -205,6 +190,8 @@ export default function Storefront() {
       city: form.get('city'),
       state: form.get('state'),
       pincode: form.get('pincode'),
+      phone: form.get('phone') || '',
+      addressId: form.get('addressId') || '',
     };
     const headers = { 'Content-Type': 'application/json' };
     try {
@@ -227,41 +214,26 @@ export default function Storefront() {
         payuForm.submit();
         return;
       }
-      if (total > 0 && settings?.razorpayEnabled) {
-        const r = await fetch('/api/checkout/razorpay', { method: 'POST', headers, body: JSON.stringify(payload) });
+      if (total > 0 && settings?.payuEnabled) {
+        const r = await fetch('/api/checkout/payu', { method: 'POST', headers, body: JSON.stringify(payload) });
         const data = await r.json();
         if (!r.ok) throw Error(data.error);
-        const loaded = await loadRazorpayScript();
-        if (!loaded || !window.Razorpay) throw Error('Unable to load Razorpay checkout. Please check your connection and retry.');
-        const rzp = new window.Razorpay({
-          key: data.razorpay.keyId,
-          amount: data.razorpay.amount,
-          currency: 'INR',
-          name: 'Experiments_Projects',
-          description: 'Component purchase',
-          order_id: data.razorpay.orderId,
-          prefill: { name: payload.name as string, email: payload.email as string },
-          theme: { color: '#d1f876' },
-          handler: async (response: Record<string, string>) => {
-            const v = await fetch('/api/checkout/verify', { method: 'POST', headers, body: JSON.stringify({ token: data.order.token, ...response }) });
-            const verified = await v.json();
-            if (!v.ok) {
-              setError(verified.error || 'Payment verification failed.');
-              setBusy(false);
-              return;
-            }
-            finishOrder(verified);
-            setBusy(false);
-          },
-          modal: {
-            ondismiss: () => {
-              setBusy(false);
-              setError('Payment was not completed. Your order is saved as pending — you can find it in My Orders.');
-            },
-          },
-        });
-        rzp.open();
-      } else {
+        // PayU requires a form POST redirect — create and submit a hidden form
+        const payuForm = document.createElement('form');
+        payuForm.method = 'POST';
+        payuForm.action = data.payuUrl;
+        for (const [k, v] of Object.entries(data.params as Record<string, string>)) {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = k;
+          input.value = v;
+          payuForm.appendChild(input);
+        }
+        document.body.appendChild(payuForm);
+        payuForm.submit();
+        return;
+      }
+      {
         const r = await fetch('/api/orders', { method: 'POST', headers, body: JSON.stringify(payload) });
         const data = await r.json();
         if (!r.ok) throw Error(data.error);
@@ -364,7 +336,7 @@ export default function Storefront() {
             <p>
               Genuine boards, sensors & rare components.
               <br />
-              Priced in ₹ with secure Razorpay checkout, and support from real builders across India.
+              Priced in ₹ with secure PayU checkout, and support from real builders across India.
             </p>
             <div className="hero-actions">
               <button className="button button-lime" onClick={() => browse('devices')}>
@@ -549,7 +521,7 @@ export default function Storefront() {
             </span>
             <i />
             <span>
-              <ShieldCheck size={13} /> Secure Razorpay payments
+              <ShieldCheck size={13} /> Secure PayU payments
             </span>
             <i />
             <span>
@@ -579,7 +551,7 @@ export default function Storefront() {
             <span>
               <ShieldCheck size={21} />
             </span>
-            <h3>Pay in ₹ with Razorpay.</h3>
+            <h3>Pay in ₹ with PayU.</h3>
             <p>UPI, cards, net-banking and wallets with instant confirmation.</p>
           </div>
           <div className="benefit">
@@ -641,7 +613,7 @@ export default function Storefront() {
               <span className="footer-social-hint">Add social links in Admin → Settings</span>
             ) : null}
           </div>
-          <span className="footer-trust"><ShieldCheck size={13} /> Secure Razorpay checkout</span>
+          <span className="footer-trust"><ShieldCheck size={13} /> Secure PayU checkout</span>
         </div>
 
         <div className="footer-col footer-cell footer-shop">
@@ -695,7 +667,7 @@ export default function Storefront() {
       </footer>
       <div className="footer-bottom page-container">
         <span>© {new Date().getFullYear()} Experiments_Projects · Made in India</span>
-        <span className="footer-payment-note"><ShieldCheck size={12} /> Payments secured by Razorpay · Prices in INR</span>
+        <span className="footer-payment-note"><ShieldCheck size={12} /> Payments secured by PayU · Prices in INR</span>
       </div>
 
       {toast && (
@@ -875,7 +847,7 @@ export default function Storefront() {
                 )}
                 <div>
                   <span>Payment</span>
-                  <span>{settings?.payuEnabled ? 'PayU · UPI / Cards' : settings?.razorpayEnabled ? 'Razorpay · UPI / Cards / Net-banking' : 'Invoice checkout'}</span>
+                  <span>{settings?.payuEnabled ? 'PayU · UPI / Cards / Net-Banking' : 'Invoice checkout'}</span>
                 </div>
                 <div className="cart-total">
                   <span>Total</span>
@@ -907,34 +879,63 @@ export default function Storefront() {
                 <input name="email" required type="email" placeholder="aarav@example.com" maxLength={254} defaultValue={user?.email || ''} />
               </label>
             </div>
-            <label>
-              Delivery address <small>(optional for digital products)</small>
-              <input name="address" placeholder="Flat, street, area" maxLength={300} />
-            </label>
-            <div className="form-row form-row-3">
-              <label>
-                City
-                <input name="city" placeholder="Bengaluru" maxLength={80} />
-              </label>
-              <label>
-                State
-                <input name="state" placeholder="Karnataka" maxLength={80} />
-              </label>
-              <label>
-                PIN code
-                <input name="pincode" placeholder="560001" maxLength={12} inputMode="numeric" />
-              </label>
-            </div>
+            {shippingFee > 0 ? (
+              <div className="checkout-address-section">
+                <h4 className="checkout-subhead">
+                  <MapPin size={14} /> Delivery address
+                </h4>
+                <AddressBook
+                  selectedId={savedAddressId}
+                  onSelect={(addr) => {
+                    setSavedAddressId(addr?.id ?? null);
+                    if (addr) {
+                      const form = document.querySelector('form.checkout-form') as HTMLFormElement | null;
+                      const set = (n: string, v: string) => {
+                        const el = form?.elements.namedItem(n) as HTMLInputElement | null;
+                        if (el) el.value = v;
+                      };
+                      set('name', addr.fullName);
+                      set('phone', addr.phone);
+                      set('address', addr.line2 ? `${addr.line1}, ${addr.line2}` : addr.line1);
+                      set('city', addr.city);
+                      set('state', addr.state);
+                      set('pincode', addr.pincode);
+                    }
+                  }}
+                />
+                <input type="hidden" name="phone" />
+                <input type="hidden" name="addressId" value={savedAddressId ?? ''} />
+              </div>
+            ) : (
+              <>
+                <label>
+                  Delivery address <small>(optional for digital products)</small>
+                  <input name="address" placeholder="Flat, street, area" maxLength={300} />
+                </label>
+                <div className="form-row form-row-3">
+                  <label>
+                    City
+                    <input name="city" placeholder="Bengaluru" maxLength={80} />
+                  </label>
+                  <label>
+                    State
+                    <input name="state" placeholder="Karnataka" maxLength={80} />
+                  </label>
+                  <label>
+                    PIN code
+                    <input name="pincode" placeholder="560001" maxLength={12} inputMode="numeric" />
+                  </label>
+                </div>
+              </>
+            )}
             <div className="invoice-notice">
-              {settings?.payuEnabled || settings?.razorpayEnabled ? <ShieldCheck size={21} /> : <Mail size={21} />}
+              {settings?.payuEnabled ? <ShieldCheck size={21} /> : <Mail size={21} />}
               <div>
-                <b>{total > 0 ? (settings?.payuEnabled ? 'PayU secure checkout' : settings?.razorpayEnabled ? 'Razorpay secure checkout' : 'Invoice checkout') : 'Your free components'}</b>
+                <b>{total > 0 ? (settings?.payuEnabled ? 'PayU secure checkout' : 'Invoice checkout') : 'Your free components'}</b>
                 <p>
                   {total > 0
                     ? settings?.payuEnabled
                       ? 'You’ll be redirected to PayU to pay securely with UPI, cards, or net-banking. Your order confirms the moment payment succeeds.'
-                      : settings?.razorpayEnabled
-                      ? 'You’ll be redirected to Razorpay to pay securely with UPI, cards, net-banking, or wallets. Your order confirms the moment payment succeeds.'
                       : 'Payment gateway is not enabled yet. Place your order now and the store owner will share payment details by email. Downloads unlock after confirmation.'
                     : 'Your downloads will be available immediately after checkout.'}
                 </p>
@@ -970,7 +971,7 @@ export default function Storefront() {
               {busy ? (
                 <Loader2 className="spin" size={17} />
               ) : total > 0 ? (
-                <>{settings?.payuEnabled ? 'Pay securely with PayU' : settings?.razorpayEnabled ? 'Pay securely with Razorpay' : 'Place invoice order'} <ArrowRight size={17} /></>
+                <>{settings?.payuEnabled ? 'Pay securely with PayU' : 'Place invoice order'} <ArrowRight size={17} /></>
               ) : (
                 <>
                   Get my components <ArrowRight size={17} />
@@ -996,7 +997,7 @@ export default function Storefront() {
           </div>
           <div className="order-reference">
             <span>{order.id}</span>
-            <span className={'status status-' + order.status}>{order.status === 'pending' ? (settings?.razorpayEnabled ? 'Payment pending' : 'Awaiting payment') : order.status}</span>
+            <span className={'status status-' + order.status}>{order.status === 'pending' ? ('Payment pending') : order.status}</span>
           </div>
           {order.items.map((item) => (
             <div className="order-line" key={item.id}>

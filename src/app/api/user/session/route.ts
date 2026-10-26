@@ -7,6 +7,7 @@ import { getUser, createUserSession, tokenHash, sameOrigin } from '@/lib/auth';
 import { findUserByEmail, userExists, createUserRecord, recordLogin } from '@/lib/user-store';
 import { verifyPassword } from '@/lib/auth-crypto';
 import { dbReady } from '@/db/schema-ddl';
+import { rateLimit, clientKey } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +30,15 @@ export async function POST(req: Request) {
     
     const meta = { ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '', userAgent: req.headers.get('user-agent') || '' };
     const { mode, name, email, password } = await req.json();
+
+    const scope = mode === 'signup' ? 'signup' : 'user-login';
+    const limit = rateLimit(clientKey(req, scope, email), mode === 'signup' ? 5 : 8, 15 * 60 * 1000);
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: `Too many attempts. Please wait ${limit.retryAfterSeconds} seconds and try again.` },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } },
+      );
+    }
     if (typeof email !== 'string' || !/^\S+@\S+\.\S+$/.test(email) || typeof password !== 'string' || password.length < 8 || password.length > 128)
       return NextResponse.json({ error: 'Enter a valid email and a password of at least 8 characters.' }, { status: 400 });
     const key = email.trim().toLowerCase().slice(0, 254);

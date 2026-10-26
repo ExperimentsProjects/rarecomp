@@ -3,6 +3,7 @@ import { getAdmin, sameOrigin } from '@/lib/auth';
 import { mkdir, writeFile } from 'fs/promises';
 import path from 'path';
 import { randomUUID } from 'crypto';
+import { rateLimit, clientKey } from '@/lib/rate-limit';
 
 const EXT: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' };
 const MAX_IMAGE_SIZE = 4 * 1024 * 1024; // stay below Vercel's ~4.5 MB body limit
@@ -16,6 +17,9 @@ const MAX_IMAGE_SIZE = 4 * 1024 * 1024; // stay below Vercel's ~4.5 MB body limi
 export async function POST(req: Request) {
   if (!sameOrigin(req) || !(await getAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
+    const limit = rateLimit(clientKey(req, 'upload'), 30, 60 * 60 * 1000);
+    if (!limit.ok) return NextResponse.json({ error: 'Upload limit reached. Please try again later.' }, { status: 429 });
+
     const form = await req.formData();
     const file = form.get('file');
     if (!(file instanceof File) || file.size > MAX_IMAGE_SIZE)

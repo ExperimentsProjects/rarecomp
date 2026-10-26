@@ -5,6 +5,7 @@ import { inArray, eq, desc } from 'drizzle-orm';
 import { getAdmin, getUser, sameOrigin } from '@/lib/auth';
 import { randomBytes, randomUUID } from 'crypto';
 import { dbReady } from '@/db/schema-ddl';
+import { rateLimit, clientKey } from '@/lib/rate-limit';
 
 const SHIPPING = ['processing', 'packed', 'shipped', 'out_for_delivery', 'delivered'];
 
@@ -57,6 +58,11 @@ export async function POST(req: Request) {
   try {
     const readiness = await dbReady();
     if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
+
+    const limit = rateLimit(clientKey(req, 'order-create'), 12, 10 * 60 * 1000);
+    if (!limit.ok) {
+      return NextResponse.json({ error: 'Too many orders placed. Please try again shortly.' }, { status: 429 });
+    }
 
     const data = await req.json();
     const result = await validateCart(data);

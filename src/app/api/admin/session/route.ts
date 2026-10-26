@@ -5,6 +5,7 @@ import { admins, sessions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { getAdmin, hashPassword, verifyPassword, createSession, tokenHash, sameOrigin } from '@/lib/auth';
 import { dbReady } from '@/db/schema-ddl';
+import { rateLimit, clientKey } from '@/lib/rate-limit';
 
 const attempts = new Map<string, { count: number; until: number }>();
 
@@ -29,6 +30,13 @@ export async function POST(req: Request) {
     if (!readiness.ok) return NextResponse.json({ error: readiness.error }, { status: 503 });
 
     const { email, password, setup } = await req.json();
+    const limit = rateLimit(clientKey(req, 'admin-login'), 8, 15 * 60 * 1000);
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: `Too many sign-in attempts. Please wait ${limit.retryAfterSeconds} seconds and try again.` },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfterSeconds) } },
+      );
+    }
     if (typeof email !== 'string' || typeof password !== 'string' || !/^\S+@\S+\.\S+$/.test(email) || password.length < 8 || password.length > 128)
       return NextResponse.json({ error: 'Enter a valid email and a password of 8–128 characters.' }, { status: 400 });
 
