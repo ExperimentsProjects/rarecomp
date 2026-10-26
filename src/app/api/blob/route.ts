@@ -19,14 +19,6 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const parsedUrl = new URL(blobUrl);
-    if (
-      parsedUrl.protocol !== 'https:' ||
-      !parsedUrl.hostname.endsWith('.blob.vercel-storage.com')
-    ) {
-      return NextResponse.json({ error: 'Invalid blob URL' }, { status: 400 });
-    }
-
     const token = process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN_READ_WRITE_TOKEN;
     if (!token) {
       console.error('[BLOB] Token missing for private delivery');

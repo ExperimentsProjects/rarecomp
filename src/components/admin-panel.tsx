@@ -10,7 +10,7 @@ import { patchFetchWithSessionTokens, saveSessionToken, clearSessionToken, captu
 import Modal from './modal';
 
 type ProductView = Product & { ratingAvg?: number; ratingCount?: number };
-type AdminSettings = Record<'razorpay_enabled' | 'razorpay_key_id' | 'razorpay_key_secret' | 'contact_email' | 'contact_phone' | 'instagram_url' | 'youtube_url' | 'x_url', string>;
+type AdminSettings = Record<'razorpay_enabled' | 'razorpay_key_id' | 'razorpay_key_secret' | 'payu_enabled' | 'payu_merchant_key' | 'payu_merchant_salt' | 'payu_mode' | 'contact_email' | 'contact_phone' | 'instagram_url' | 'youtube_url' | 'x_url', string>;
 type Tab = 'overview' | 'sections' | 'products' | 'orders' | 'users' | 'reviews' | 'subscribers' | 'settings';
 type Subscriber = { email: string; createdAt: string };
 type AdminUser = { id: string; name: string; email: string; createdAt: string; lastLoginAt: string | null; loginCount: number; orderCount: number; paidOrders: number; totalSpentPaise: number };
@@ -398,6 +398,10 @@ export default function AdminPanel() {
           razorpay_enabled: form.get('rzp_enabled') === 'on' ? '1' : '0',
           razorpay_key_id: form.get('rzp_key_id'),
           razorpay_key_secret: form.get('rzp_key_secret'),
+          payu_enabled: form.get('payu_enabled') === 'on' ? '1' : '0',
+          payu_merchant_key: form.get('payu_merchant_key'),
+          payu_merchant_salt: form.get('payu_merchant_salt'),
+                    payu_mode: form.get('payu_mode'),
           contact_email: form.get('contact_email'),
           contact_phone: form.get('contact_phone'),
           instagram_url: form.get('instagram_url'),
@@ -979,6 +983,7 @@ export default function AdminPanel() {
                           </td>
                           <td>
                             <b>{formatINR(o.total)}</b>
+                            {o.shippingFee > 0 && <small className="lime-text">+ {formatINR(o.shippingFee)} fee</small>}
                             {o.paymentId && <small className="table-email">{o.paymentId}</small>}
                           </td>
                           <td>
@@ -1299,11 +1304,38 @@ export default function AdminPanel() {
                     X (Twitter) URL
                     <input name="x_url" type="url" placeholder="https://x.com/…" defaultValue={settings.x_url} />
                   </label>
+                  
+                  <h3 className="settings-subhead">PayU Payment Gateway</h3>
+                  <label className="checkbox-label settings-toggle">
+                    <input type="checkbox" name="payu_enabled" defaultChecked={settings.payu_enabled === '1'} />
+                    <span>
+                      <b>Enable PayU Checkout</b>
+                      <small>Accept payments via PayU, UPI, and Cards.</small>
+                    </span>
+                  </label>
+                  <label>
+                    Merchant Key
+                    <input name="payu_merchant_key" defaultValue={settings.payu_merchant_key} placeholder="Your PayU Merchant Key" />
+                  </label>
+                  <label>
+                    Merchant Salt
+                    <input name="payu_merchant_salt" type="password" defaultValue={settings.payu_merchant_salt} placeholder="Your PayU Salt" />
+                  </label>
+                  <div className="form-row">
+                    <label>
+                      Mode
+                      <select name="payu_mode" defaultValue={settings.payu_mode || 'test'}>
+                        <option value="test">Test Mode</option>
+                        <option value="live">Live Mode</option>
+                      </select>
+                    </label>
+                  </div>
+
                   {formError && <p className="form-error">{formError}</p>}
                   <button className="button button-lime" disabled={busy}>
                     {busy ? <Loader2 size={15} className="spin" /> : <Check size={15} />} Save store settings
                   </button>
-                 </form>
+                </form>
                 <div className="settings-test-grid">
                   <button type="button" className="button button-secondary rzp-test-btn" onClick={testRazorpay} disabled={rzpTesting}>
                     {rzpTesting ? <Loader2 size={15} className="spin" /> : <ShieldCheck size={15} />} Test Razorpay credentials
@@ -1361,6 +1393,7 @@ export default function AdminPanel() {
                 {[
                   { name: 'PostgreSQL database', detail: 'Products, sections, orders, users & reviews.', status: 'Connected', on: true },
                   { name: 'Razorpay (₹)', detail: 'Live UPI/card payments with signature verification.', status: rzpOn ? 'Live' : 'Configure keys', on: rzpOn },
+                  { name: 'PayU (₹)', detail: 'Live professional checkout via PayU PG.', status: settings?.payu_enabled === '1' && settings?.payu_merchant_key ? 'Connected' : 'Configure keys', on: settings?.payu_enabled === '1' && !!settings?.payu_merchant_key },
                   { name: 'Image storage', detail: 'Product images up to 5 MB (JPG/PNG/WebP/GIF).', status: 'Connected', on: true },
                   { name: 'Digital delivery', detail: 'Downloads unlock after payment confirms.', status: 'Connected', on: true },
                 ].map((i) => (

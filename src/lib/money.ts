@@ -3,6 +3,7 @@ export const DIGITAL_CATEGORIES = [
   'Source Code',
   'Source Code & Firmware',
   'Firmware',
+  'Assistance',
   'UI Components',
   '3D Components',
   'Landing Pages',

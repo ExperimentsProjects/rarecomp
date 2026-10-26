@@ -65,6 +65,7 @@ const DDL: string[] = [
     email text NOT NULL,
     items jsonb NOT NULL,
     total integer NOT NULL,
+    shipping_fee integer NOT NULL DEFAULT 0,
     status text NOT NULL DEFAULT 'pending',
     address text,
     city text,

@@ -31,16 +31,24 @@ export async function validateCart(data: Record<string, unknown>) {
   const found = await db.select().from(products).where(inArray(products.id, ids));
   if (found.length !== ids.length || found.some((p) => !p.active))
     return { error: 'A component is no longer available. Please refresh your cart.' } as const;
-  const total = found.reduce((sum, p) => sum + p.price, 0);
+  const subtotal = found.reduce((sum, p) => sum + p.price, 0);
   const user = await getUser();
   const { isDigital } = await import('@/lib/money');
+  const items = found.map((p) => ({ id: p.id, name: p.name, price: p.price, category: p.category, digital: isDigital(p.category) }));
+  
+  // ₹100 shipping fee if any item is NOT digital. 0 for purely digital carts.
+  const shippingFee = items.some(i => !i.digital) ? 10000 : 0;
+  const total = subtotal + shippingFee;
+
   return {
     found,
+    subtotal,
+    shippingFee,
     total,
     userId: user?.id ?? null,
     name: (name as string).trim().slice(0, 150),
     email: (email as string).trim().toLowerCase().slice(0, 254),
-    items: found.map((p) => ({ id: p.id, name: p.name, price: p.price, category: p.category, digital: isDigital(p.category) })),
+    items,
   } as const;
 }
 
@@ -63,6 +71,7 @@ export async function POST(req: Request) {
         email: result.email,
         items: result.items,
         total: result.total,
+        shippingFee: result.shippingFee,
         status: result.total === 0 ? 'paid' : 'pending',
         ...cleanAddress(data),
       })

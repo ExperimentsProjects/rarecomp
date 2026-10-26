@@ -277,7 +277,10 @@ export default function Account() {
                       </small>
                     </div>
                     <span className={'status status-' + o.status}>{o.status === 'pending' ? 'Payment pending' : o.status}</span>
-                    <strong>{formatINR(o.total)}</strong>
+                    <div className="account-order-price">
+                      <strong>{formatINR(o.total)}</strong>
+                      {o.shippingFee > 0 && <small>Incl. delivery</small>}
+                    </div>
                     <Link className="icon-button" href={'/orders/' + o.token} target="_blank" aria-label="Open private order page" title="Private order page">
                       <ExternalLink size={14} />
                     </Link>

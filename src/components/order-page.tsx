@@ -141,9 +141,21 @@ export default function OrderPage({ token }: { token: string }) {
                   </div>
                 </div>
               ))}
-              <div className="checkout-total">
-                <span>Total · INR</span>
-                <b>{formatINR(order.total)}</b>
+              <div className="checkout-total-block">
+                <div className="checkout-line">
+                  <span>Subtotal</span>
+                  <b>{formatINR(order.total - order.shippingFee)}</b>
+                </div>
+                {order.shippingFee > 0 && (
+                  <div className="checkout-line">
+                    <span>Delivery charges</span>
+                    <b>{formatINR(order.shippingFee)}</b>
+                  </div>
+                )}
+                <div className="checkout-total">
+                  <span>Total · INR</span>
+                  <b>{formatINR(order.total)}</b>
+                </div>
               </div>
               <div className="invoice-notice">
                 <ShieldCheck size={19} />

@@ -62,6 +62,7 @@ export const orders = pgTable('orders', {
   email: text('email').notNull(),
   items: jsonb('items').$type<{ id: string; name: string; price: number; category?: string; digital?: boolean }[]>().notNull(),
   total: integer('total').notNull(),
+  shippingFee: integer('shipping_fee').notNull().default(0),
   status: text('status').notNull().default('pending'),
   address: text('address'),
   city: text('city'),

@@ -100,6 +100,8 @@
 .account-order-head b{font-size:13px;color:#e2f1cf;display:block}
 .account-order-head small{font-size:9px;color:#87a06e;display:block;margin-top:4px}
 .account-order-head strong{font-size:15px;color:#def0c3;font-weight:600}
+.account-order-price{text-align:right}
+.account-order-price small{display:block;font-size:7px;color:#859c70;margin-top:2px}
 .account-shipping{padding:15px 20px 19px;border-bottom:1px solid #2f4225;background:#b9e08105}
 .account-shipping-top{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#b9d59b}
 .account-shipping-top>span{display:inline-flex;gap:7px;align-items:center;font-weight:600}

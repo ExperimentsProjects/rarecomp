@@ -36,6 +36,7 @@ export async function POST(req: Request) {
         email: result.email,
         items: result.items,
         total: result.total,
+        shippingFee: result.shippingFee,
         status: 'pending',
         razorpayOrderId: rzp.id,
         address: clean(data.address, 300),

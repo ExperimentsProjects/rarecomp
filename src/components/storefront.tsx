@@ -150,7 +150,9 @@ export default function Storefront() {
   };
 
   const cartProducts = products.filter((p) => cart.includes(p.id));
-  const total = cartProducts.reduce((a, p) => a + p.price, 0);
+  const subtotal = cartProducts.reduce((a, p) => a + p.price, 0);
+  const shippingFee = cartProducts.some((p) => !isDigital(p.category)) ? 10000 : 0;
+  const total = subtotal + shippingFee;
 
   const filtered = useMemo(() => {
     const list = products.filter(
@@ -206,6 +208,25 @@ export default function Storefront() {
     };
     const headers = { 'Content-Type': 'application/json' };
     try {
+      if (total > 0 && settings?.payuEnabled) {
+        const r = await fetch('/api/checkout/payu', { method: 'POST', headers, body: JSON.stringify(payload) });
+        const data = await r.json();
+        if (!r.ok) throw Error(data.error);
+        // PayU requires a form POST redirect — create and submit a hidden form
+        const payuForm = document.createElement('form');
+        payuForm.method = 'POST';
+        payuForm.action = data.payuUrl;
+        for (const [k, v] of Object.entries(data.params as Record<string, string>)) {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = k;
+          input.value = v;
+          payuForm.appendChild(input);
+        }
+        document.body.appendChild(payuForm);
+        payuForm.submit();
+        return;
+      }
       if (total > 0 && settings?.razorpayEnabled) {
         const r = await fetch('/api/checkout/razorpay', { method: 'POST', headers, body: JSON.stringify(payload) });
         const data = await r.json();
@@ -844,11 +865,17 @@ export default function Storefront() {
               <div className="cart-summary">
                 <div>
                   <span>Subtotal</span>
-                  <b>{formatINR(total)}</b>
+                  <b>{formatINR(subtotal)}</b>
                 </div>
+                {shippingFee > 0 && (
+                  <div>
+                    <span>Delivery charges</span>
+                    <b>{formatINR(shippingFee)}</b>
+                  </div>
+                )}
                 <div>
                   <span>Payment</span>
-                  <span>{settings?.razorpayEnabled ? 'Razorpay · UPI / Cards / Net-banking' : 'Invoice checkout'}</span>
+                  <span>{settings?.payuEnabled ? 'PayU · UPI / Cards' : settings?.razorpayEnabled ? 'Razorpay · UPI / Cards / Net-banking' : 'Invoice checkout'}</span>
                 </div>
                 <div className="cart-total">
                   <span>Total</span>
@@ -899,23 +926,37 @@ export default function Storefront() {
               </label>
             </div>
             <div className="invoice-notice">
-              {settings?.razorpayEnabled ? <ShieldCheck size={21} /> : <Mail size={21} />}
+              {settings?.payuEnabled || settings?.razorpayEnabled ? <ShieldCheck size={21} /> : <Mail size={21} />}
               <div>
-                <b>{total > 0 ? (settings?.razorpayEnabled ? 'Razorpay secure checkout' : 'Invoice checkout') : 'Your free components'}</b>
+                <b>{total > 0 ? (settings?.payuEnabled ? 'PayU secure checkout' : settings?.razorpayEnabled ? 'Razorpay secure checkout' : 'Invoice checkout') : 'Your free components'}</b>
                 <p>
                   {total > 0
-                    ? settings?.razorpayEnabled
+                    ? settings?.payuEnabled
+                      ? 'You’ll be redirected to PayU to pay securely with UPI, cards, or net-banking. Your order confirms the moment payment succeeds.'
+                      : settings?.razorpayEnabled
                       ? 'You’ll be redirected to Razorpay to pay securely with UPI, cards, net-banking, or wallets. Your order confirms the moment payment succeeds.'
-                      : 'Razorpay is not enabled yet. Place your order now and the store owner will share payment details by email. Downloads unlock after confirmation.'
+                      : 'Payment gateway is not enabled yet. Place your order now and the store owner will share payment details by email. Downloads unlock after confirmation.'
                     : 'Your downloads will be available immediately after checkout.'}
                 </p>
               </div>
             </div>
-            <div className="checkout-total">
-              <span>
-                {cartProducts.length} component{cartProducts.length !== 1 ? 's' : ''}
-              </span>
-              <b>{formatINR(total)}</b>
+            <div className="checkout-total-block">
+              <div className="checkout-line">
+                <span>Subtotal</span>
+                <b>{formatINR(subtotal)}</b>
+              </div>
+              {shippingFee > 0 && (
+                <div className="checkout-line">
+                  <span>Delivery charges</span>
+                  <b>{formatINR(shippingFee)}</b>
+                </div>
+              )}
+              <div className="checkout-total">
+                <span>
+                  Total ({cartProducts.length} item{cartProducts.length !== 1 ? 's' : ''})
+                </span>
+                <b>{formatINR(total)}</b>
+              </div>
             </div>
             <label className="checkbox-label">
               <input type="checkbox" required /> I agree to the terms of sale. Digital downloads are non-refundable once delivered.
@@ -929,7 +970,7 @@ export default function Storefront() {
               {busy ? (
                 <Loader2 className="spin" size={17} />
               ) : total > 0 ? (
-                <>{settings?.razorpayEnabled ? 'Pay securely with Razorpay' : 'Place invoice order'} <ArrowRight size={17} /></>
+                <>{settings?.payuEnabled ? 'Pay securely with PayU' : settings?.razorpayEnabled ? 'Pay securely with Razorpay' : 'Place invoice order'} <ArrowRight size={17} /></>
               ) : (
                 <>
                   Get my components <ArrowRight size={17} />

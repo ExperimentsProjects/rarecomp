@@ -6,6 +6,10 @@ const DEFAULTS: Record<string, string> = {
   razorpay_enabled: '0',
   razorpay_key_id: '',
   razorpay_key_secret: '',
+  payu_enabled: '1',
+  payu_merchant_key: '2DgRi1',
+  payu_merchant_salt: 'mV3eod8QkvrqscQrcbIfabzBjiswtsdm',
+  payu_mode: 'live',
   contact_email: 'electricalandelectronics64@gmail.com',
   contact_phone: '+91 8639396238',
   instagram_url: '',
@@ -26,6 +30,7 @@ export const STORE_IDENTITY = {
 export type StoreSettings = {
   razorpayEnabled: boolean;
   razorpayKeyId: string;
+  payuEnabled: boolean;
   contactEmail: string;
   contactPhone: string;
   instagramUrl: string;
@@ -58,11 +63,12 @@ export async function getRazorpayKeys() {
 }
 
 export async function getPublicSettings(): Promise<StoreSettings> {
-  const { keyId, enabled } = await getRazorpayKeys();
+  const rzp = await getRazorpayKeys();
   const all = await loadAll();
   return {
-    razorpayEnabled: enabled,
-    razorpayKeyId: enabled ? keyId : '',
+    razorpayEnabled: rzp.enabled,
+    razorpayKeyId: rzp.enabled ? rzp.keyId : '',
+    payuEnabled: all.payu_enabled === '1' && !!all.payu_merchant_key && !!all.payu_merchant_salt,
     contactEmail: all.contact_email,
     contactPhone: all.contact_phone,
     instagramUrl: all.instagram_url,
@@ -92,6 +98,10 @@ export async function getAdminSettings() {
     razorpay_enabled: all.razorpay_enabled,
     razorpay_key_id: all.razorpay_key_id,
     razorpay_key_secret: all.razorpay_key_secret,
+    payu_enabled: all.payu_enabled,
+    payu_merchant_key: all.payu_merchant_key,
+    payu_merchant_salt: all.payu_merchant_salt,
+    payu_mode: all.payu_mode,
     contact_email: all.contact_email,
     contact_phone: all.contact_phone,
     instagram_url: all.instagram_url,
