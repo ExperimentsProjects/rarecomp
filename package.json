@@ -1,5 +1,6 @@
 {
-  "name": "nextjs-postgresql-template",
+  "name": "experiments-projects",
+  "version": "1.0.0",
   "private": true,
   "engines": {
     "node": ">=22",
@@ -10,7 +11,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:push": "drizzle-kit push --force",
+    "verify:deploy": "node scripts/check-vercel-ready.mjs"
   },
   "dependencies": {
     "@playwright/test": "^1.63.0",

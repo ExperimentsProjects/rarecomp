@@ -1,12 +1,13 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ArrowUpRight, CheckCircle2, Download, ExternalLink, Eye, EyeOff, Link2, Loader2, LogOut, Package, RefreshCw, ShoppingBag, Star, Truck, UserRound, X } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, CheckCircle2, Download, ExternalLink, Eye, EyeOff, Link2, Loader2, LogOut, MapPin, Package, RefreshCw, ShoppingBag, Star, Truck, UserRound, X } from 'lucide-react';
 import { isDigital } from '@/lib/money';
 import type { Order } from '@/db/schema';
 import { formatINR } from '@/lib/money';
 import { Brand, InstagramIcon, YoutubeIcon, XIcon } from './visuals';
-import { ShippingSteps } from './ship-steps';
+import { ShippingSteps, SHIPPING_STEPS } from './ship-steps';
+import AddressBook, { type SavedAddress } from './address-book';
 import { patchFetchWithSessionTokens, saveSessionToken, clearSessionToken, captureTokenFromUrl, loginUrl } from './session-token';
 import Modal from './modal';
 
@@ -21,10 +22,27 @@ export default function Account() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [linkToken, setLinkToken] = useState('');
+  const [addresses, setAddresses] = useState<SavedAddress[]>([]);
   const [showPassword, setShowPassword] = useState(false);
   const [reviewFor, setReviewFor] = useState<{ productId: string; name: string } | null>(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
+
+  const notify = (message: string) => {
+    setNotice(message);
+    window.setTimeout(() => setNotice(''), 4000);
+  };
+
+  const loadAddresses = useCallback(async () => {
+    try {
+      const r = await fetch('/api/user/addresses', { cache: 'no-store' });
+      if (!r.ok) return;
+      const list = await r.json();
+      if (Array.isArray(list)) setAddresses(list);
+    } catch {
+      /* non-blocking */
+    }
+  }, []);
 
   const loadOrders = useCallback(async () => {
     try {
@@ -52,9 +70,10 @@ export default function Account() {
     captureTokenFromUrl();
     patchFetchWithSessionTokens();
     void check();
+    void loadAddresses();
     const i = setInterval(loadOrders, 30000);
     return () => clearInterval(i);
-  }, [check, loadOrders]);
+  }, [check, loadOrders, loadAddresses]);
 
   const auth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -108,6 +127,7 @@ export default function Account() {
       setLinkToken('');
       setNotice(`Order ${data.orderId} is now linked to your account.`);
       await loadOrders();
+      await loadAddresses();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not link order.');
     } finally {
@@ -247,6 +267,90 @@ export default function Account() {
                 </div>
               </div>
             </div>
+
+            <section className="profile-section">
+              <div className="profile-section-head">
+                <div>
+                  <h2>
+                    <MapPin size={16} /> Saved addresses
+                  </h2>
+                  <p>Save a delivery address once and check out faster next time.</p>
+                </div>
+                <span className="profile-count">{addresses.length} saved</span>
+              </div>
+              <AddressBook
+                selectedId={null}
+                onSelect={(addr) => {
+                  if (addr) notify(`Using ${addr.label} address for delivery.`);
+                  void loadAddresses();
+                }}
+              />
+            </section>
+
+            <section className="profile-section">
+              <div className="profile-section-head">
+                <div>
+                  <h2>
+                    <Truck size={16} /> Delivery tracking
+                  </h2>
+                  <p>Live status for every physical order, from packed to delivered.</p>
+                </div>
+                <span className="profile-count">{inTransit} in transit</span>
+              </div>
+              {orders.filter((o) => o.status === 'paid' && o.items.some((i) => !i.digital)).length === 0 ? (
+                <p className="muted profile-empty-note">No physical shipments yet. Tracking appears here as soon as a hardware order is dispatched.</p>
+              ) : (
+                <div className="tracking-list">
+                  {orders
+                    .filter((o) => o.status === 'paid' && o.items.some((i) => !i.digital))
+                    .map((o) => {
+                      const stepIndex = Math.max(0, SHIPPING_STEPS.findIndex((s) => s.id === o.shipping));
+                      const physical = o.items.filter((i) => !i.digital);
+                      return (
+                        <div className="tracking-card" key={o.id}>
+                          <div className="tracking-card-head">
+                            <div>
+                              <b>{o.id}</b>
+                              <small>
+                                {physical.length} physical item{physical.length !== 1 ? 's' : ''} · {new Date(o.createdAt).toLocaleDateString('en-IN')}
+                              </small>
+                            </div>
+                            <span className={'status status-' + (o.shipping === 'delivered' ? 'paid' : 'draft')}>
+                              {SHIPPING_STEPS[stepIndex]?.name}
+                            </span>
+                          </div>
+                          <div className="tracking-card-body">
+                            <div className="tracking-mini-steps">
+                              {SHIPPING_STEPS.map((s, i) => (
+                                <span key={s.id} className={i <= stepIndex ? 'done' : ''}>
+                                  {s.name}
+                                </span>
+                              ))}
+                            </div>
+                            {o.address && (
+                              <p className="tracking-address">
+                                <MapPin size={12} /> {o.address}
+                                {o.city ? `, ${o.city}` : ''}
+                                {o.state ? `, ${o.state}` : ''} {o.pincode || ''}
+                              </p>
+                            )}
+                            {o.courier && (
+                              <p className="tracking-courier">
+                                <Truck size={12} /> {o.courier}
+                                {o.trackingUrl && (
+                                  <a href={o.trackingUrl} target="_blank" rel="noopener noreferrer" className="text-link">
+                                    Track <ArrowUpRight size={11} />
+                                  </a>
+                                )}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </section>
 
             <form className="link-order-bar" onSubmit={linkOrder}>
               <Link2 size={17} />

@@ -135,8 +135,18 @@ export async function DELETE(req: Request) {
 
     const id = new URL(req.url).searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'Missing product ID' }, { status: 400 });
+
+    // `permanent=1` removes the component and its downloadable source entirely.
+    // Otherwise it is soft-deleted (unpublished) so existing orders keep working.
+    const permanent = new URL(req.url).searchParams.get('permanent') === '1';
+    if (permanent) {
+      await db.delete(reviews).where(eq(reviews.productId, id));
+      await db.delete(products).where(eq(products.id, id));
+      return NextResponse.json({ success: true, permanent: true });
+    }
+
     await db.update(products).set({ active: false }).where(eq(products.id, id));
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, permanent: false });
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }

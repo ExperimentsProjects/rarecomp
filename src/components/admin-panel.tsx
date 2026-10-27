@@ -306,14 +306,104 @@ export default function AdminPanel() {
     }
   };
 
-  const archiveProduct = async () => {
+  const [sourceManager, setSourceManager] = useState<ProductView | null>(null);
+  const [sourceText, setSourceText] = useState('');
+  const [sourceDirty, setSourceDirty] = useState(false);
+
+  const openSourceManager = (p: ProductView) => {
+    setSourceManager(p);
+    setSourceText(p.source || '');
+    setSourceDirty(false);
+    setFormError('');
+  };
+
+  const saveSource = async () => {
+    if (!sourceManager) return;
+    setBusy(true);
+    setFormError('');
+    try {
+      const r = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: sourceManager.id,
+          name: sourceManager.name,
+          description: sourceManager.description,
+          category: sourceManager.category,
+          sectionId: sourceManager.sectionId,
+          price: sourceManager.price,
+          oldPrice: sourceManager.oldPrice,
+          image: sourceManager.image,
+          preview: sourceManager.preview,
+          specs: sourceManager.specs,
+          tags: sourceManager.tags,
+          badge: sourceManager.badge,
+          featured: sourceManager.featured,
+          active: sourceManager.active,
+          source: sourceText,
+        }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw Error(data.error || 'Could not save the source code.');
+      setNotice('Source code updated successfully.');
+      setSourceDirty(false);
+      setSourceManager(null);
+      await loadData();
+    } catch (e) {
+      setFormError(e instanceof Error ? e.message : 'Could not save the source code.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const clearSource = async () => {
+    if (!sourceManager) return;
+    setBusy(true);
+    setFormError('');
+    try {
+      const r = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: sourceManager.id,
+          name: sourceManager.name,
+          description: sourceManager.description,
+          category: sourceManager.category,
+          sectionId: sourceManager.sectionId,
+          price: sourceManager.price,
+          oldPrice: sourceManager.oldPrice,
+          image: sourceManager.image,
+          preview: sourceManager.preview,
+          specs: sourceManager.specs,
+          tags: sourceManager.tags,
+          badge: sourceManager.badge,
+          featured: sourceManager.featured,
+          active: sourceManager.active,
+          source: '',
+        }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw Error(data.error || 'Could not remove the source code.');
+      setNotice('Source code removed. The built-in starter file will be delivered instead.');
+      setSourceText('');
+      setSourceDirty(false);
+      setSourceManager(null);
+      await loadData();
+    } catch (e) {
+      setFormError(e instanceof Error ? e.message : 'Could not remove the source code.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const archiveProduct = async (permanent = false) => {
     if (!archive) return;
     setBusy(true);
     try {
-      const r = await fetch('/api/products?id=' + archive.id, { method: 'DELETE' });
+      const r = await fetch('/api/products?id=' + archive.id + (permanent ? '&permanent=1' : ''), { method: 'DELETE' });
       if (!r.ok) throw Error('Could not unpublish this component.');
       setArchive(null);
-      setNotice('Component unpublished.');
+      setNotice(permanent ? 'Component and its source code permanently deleted.' : 'Component unpublished.');
       await loadData();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Please retry.');
@@ -872,17 +962,18 @@ export default function AdminPanel() {
                         </td>
                         <td>
                           <div className="table-actions">
-                            <button className="icon-button" aria-label={`Edit ${p.name}`} title="Edit" onClick={() => editProduct(p)}>
+                            <button className="icon-button" aria-label={`Edit ${p.name}`} title="Edit details" onClick={() => editProduct(p)}>
                               <Pencil size={15} />
                             </button>
-                            <a className="icon-button" href={'/api/download/' + p.id} aria-label="Download source" title="Download source">
+                            <button className="icon-button" aria-label={`Manage source code for ${p.name}`} title="Manage source code" onClick={() => openSourceManager(p)}>
+                              <Code2 size={15} />
+                            </button>
+                            <a className="icon-button" href={'/api/download/' + p.id} aria-label="Download source" title="Download source file">
                               <Download size={15} />
                             </a>
-                            {p.active && (
-                              <button className="icon-button danger-hover" aria-label={`Unpublish ${p.name}`} title="Unpublish" onClick={() => setArchive(p)}>
-                                <EyeOff size={15} />
-                              </button>
-                            )}
+                            <button className="icon-button danger-hover" aria-label={`Delete ${p.name}`} title="Unpublish or delete" onClick={() => setArchive(p)}>
+                              <Trash2 size={15} />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -1594,15 +1685,73 @@ export default function AdminPanel() {
         </Modal>
       )}
 
+      {sourceManager && (
+        <Modal title={`Source code · ${sourceManager.name}`} onClose={() => setSourceManager(null)} wide>
+          <p className="modal-intro">
+            This is the file customers download after paying. Leave it empty to deliver the built-in starter file instead.
+          </p>
+          <div className="source-manager-toolbar">
+            <span className={'status ' + (sourceManager.source ? 'status-paid' : 'status-draft')}>
+              {sourceManager.source ? `${sourceManager.source.length.toLocaleString()} characters attached` : 'No custom file — starter will be delivered'}
+            </span>
+            <span className="source-manager-actions">
+              <a className="button button-secondary" href={'/api/download/' + sourceManager.id} target="_blank" rel="noopener noreferrer">
+                <Download size={14} /> Download current
+              </a>
+              {sourceManager.source && (
+                <button type="button" className="button button-secondary" onClick={clearSource} disabled={busy}>
+                  <Trash2 size={14} /> Remove file
+                </button>
+              )}
+            </span>
+          </div>
+          <textarea
+            className="source-manager-editor"
+            value={sourceText}
+            spellCheck={false}
+            onChange={(e) => {
+              setSourceText(e.target.value);
+              setSourceDirty(true);
+            }}
+            placeholder="Paste the complete HTML/CSS source customers will download…"
+            aria-label="Downloadable source code"
+          />
+          {formError && <p className="form-error">{formError}</p>}
+          <div className="modal-footer">
+            <button className="button button-secondary" onClick={() => setSourceManager(null)} disabled={busy}>
+              Close
+            </button>
+            <button className="button button-lime" onClick={saveSource} disabled={busy || !sourceDirty}>
+              {busy ? <Loader2 size={15} className="spin" /> : <Check size={15} />} Save source code
+            </button>
+          </div>
+        </Modal>
+      )}
+
       {archive && (
-        <Modal title="Unpublish this component?" onClose={() => setArchive(null)}>
-          <p className="modal-intro">{archive.name} will be hidden from the storefront. Existing customers keep their downloads. Publish again anytime.</p>
+        <Modal title="Delete this component?" onClose={() => setArchive(null)}>
+          <p className="modal-intro">
+            <b>{archive.name}</b> — choose how you want to remove it.
+          </p>
+          <div className="delete-options">
+            <button className="delete-option" onClick={() => archiveProduct(false)} disabled={busy}>
+              <EyeOff size={17} />
+              <span>
+                <b>Unpublish (recommended)</b>
+                <small>Hides it from the storefront but keeps the record, source code and customer downloads intact. You can publish it again anytime.</small>
+              </span>
+            </button>
+            <button className="delete-option delete-option-danger" onClick={() => archiveProduct(true)} disabled={busy}>
+              <Trash2 size={17} />
+              <span>
+                <b>Delete permanently</b>
+                <small>Permanently erases the component, its downloadable source code and its reviews. This cannot be undone.</small>
+              </span>
+            </button>
+          </div>
           <div className="modal-footer">
             <button className="button button-secondary" onClick={() => setArchive(null)}>
-              Keep published
-            </button>
-            <button className="button button-danger" onClick={archiveProduct} disabled={busy}>
-              {busy ? <Loader2 size={14} className="spin" /> : <EyeOff size={14} />} Unpublish
+              Cancel
             </button>
           </div>
         </Modal>
