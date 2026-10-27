@@ -111,6 +111,8 @@ export async function POST(req: Request) {
       badge: data.badge || null,
       featured: !!data.featured,
       active: data.active !== false,
+      stock: Number.isInteger(data.stock) && data.stock >= 0 ? Math.min(data.stock, 1000000) : 10,
+      inStock: data.inStock !== false,
       source: typeof data.source === 'string' ? data.source.slice(0, 500000) : null,
     };
 

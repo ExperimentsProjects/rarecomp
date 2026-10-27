@@ -18,3 +18,66 @@
 .act-signup{background:#d1f87618;border-color:#8bbd4f;color:#d8f7a5}
 .act-failed{background:#e7a17914;border-color:#a4624659;color:#eeb49b}
 .act-login{background:#a7c9f714;border-color:#5f86b366;color:#b9d4f5}
+
+/* ===== Visible action buttons in admin tables ===== */
+.action-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:6px 10px;
+  font-size:9.5px;
+  font-weight:500;
+  line-height:1.2;
+  white-space:nowrap;
+  color:#c3d9ac;
+  background:#d1f8760d;
+  border:1px solid #4a6636;
+  border-radius:6px;
+  transition:all .18s;
+}
+.action-btn:hover{background:var(--lime);color:#202617;border-color:var(--lime);transform:translateY(-1px)}
+.action-btn:disabled{opacity:.5;cursor:wait;transform:none}
+.action-btn-danger{color:#efab93;background:#e07a5c0f;border-color:#7a4634}
+.action-btn-danger:hover{background:#e07a5c;color:#1b0f0b;border-color:#e07a5c}
+.table-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:max-content}
+.admin-table td{vertical-align:middle}
+/* Keep the actions column pinned so the buttons are always reachable */
+.admin-table th:last-child,.admin-table td:last-child{
+  width:1%;
+  white-space:nowrap;
+  padding-left:14px;
+  position:sticky;
+  right:0;
+  background:#181f15;
+  box-shadow:-8px 0 12px -8px #000a;
+}
+.admin-table thead th:last-child{background:#14200f;z-index:2}
+.admin-table tbody tr:hover td:last-child{background:#1c2519}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.table-scroll::-webkit-scrollbar{height:8px}
+.table-scroll::-webkit-scrollbar-thumb{background:#3a4d2c;border-radius:8px}
+.table-scroll::-webkit-scrollbar-track{background:#141c10}
+
+/* ===== Stock column ===== */
+.stock-cell{display:flex;flex-direction:column;gap:5px;align-items:flex-start}
+.stock-cell>input{
+  width:66px;
+  background:#10180c;
+  border:1px solid #40552f;
+  border-radius:5px;
+  padding:5px 7px;
+  font-size:10.5px;
+  color:#dcecbe;
+  -moz-appearance:textfield;
+}
+.stock-cell>input::-webkit-outer-spin-button,
+.stock-cell>input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.stock-cell>input:focus{border-color:var(--lime);outline:none}
+.stock-pill{font-size:7.5px;letter-spacing:.3px;padding:2px 7px;border-radius:20px;white-space:nowrap}
+.stock-pill.in{background:#d1f87616;border:1px solid #6d8a4c;color:#cfe9a8}
+.stock-pill.out{background:#e07a5c14;border:1px solid #7a4634;color:#f0b49c}
+
+/* ===== User row actions ===== */
+.user-row-actions{display:flex;flex-direction:column;gap:7px;align-items:flex-start}
+.user-row-actions .text-link{font-size:9px;gap:5px}
+@media(max-width:700px){.action-btn{padding:5px 7px;font-size:8.5px;gap:4px}.stock-cell>input{width:58px}}

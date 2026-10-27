@@ -31,6 +31,8 @@ const DDL: string[] = [
     badge text,
     featured boolean NOT NULL DEFAULT false,
     active boolean NOT NULL DEFAULT true,
+    stock integer NOT NULL DEFAULT 10,
+    in_stock boolean NOT NULL DEFAULT true,
     source text,
     created_at timestamp NOT NULL DEFAULT now()
   )`,
@@ -142,6 +144,8 @@ let ddlPromise: Promise<DbReadiness> | undefined;
  * are safe to run on every boot.
  */
 const COLUMN_MIGRATIONS: string[] = [
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS stock integer NOT NULL DEFAULT 10`,
+  `ALTER TABLE products ADD COLUMN IF NOT EXISTS in_stock boolean NOT NULL DEFAULT true`,
   `ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_fee integer NOT NULL DEFAULT 0`,
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS specs jsonb NOT NULL DEFAULT '[]'::jsonb`,
   `ALTER TABLE products ADD COLUMN IF NOT EXISTS tags jsonb NOT NULL DEFAULT '[]'::jsonb`,

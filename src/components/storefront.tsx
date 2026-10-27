@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, ArrowUpRight, Search, ShoppingBag, MapPin, ChevronDown, Check, Heart, X, SlidersHorizontal, Grid2X2, Box, Sparkles, Code2, ShieldCheck, Download, ExternalLink, Plus, Menu, UserRound, Star, CheckCircle2, Loader2, Trash2, Copy, Mail, Phone, RefreshCw, Package, Truck } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Search, ShoppingBag, MapPin, PackageX, ChevronDown, Check, Heart, X, SlidersHorizontal, Grid2X2, Box, Sparkles, Code2, ShieldCheck, Download, ExternalLink, Plus, Menu, UserRound, Star, CheckCircle2, Loader2, Trash2, Copy, Mail, Phone, RefreshCw, Package, Truck } from 'lucide-react';
 import type { Product, Order, Review, Section } from '@/db/schema';
 import type { StoreSettings } from '@/lib/settings';
 import { formatINR, isDigital } from '@/lib/money';
@@ -120,6 +120,10 @@ export default function Storefront() {
     localStorage.setItem('stackd-cart', JSON.stringify(ids));
   };
   const addToCart = (p: ProductView) => {
+    if (outOfStock(p)) {
+      notify('Sorry — this component is out of stock right now.');
+      return;
+    }
     if (cart.includes(p.id)) {
       setSelected(null);
       setDialog('cart');
@@ -133,6 +137,9 @@ export default function Storefront() {
     setSaved(next);
     localStorage.setItem('stackd-saved', JSON.stringify(next));
   };
+
+  const outOfStock = (p: { inStock?: boolean; stock?: number }) =>
+    p.inStock === false || (p.stock ?? 1) <= 0;
 
   const cartProducts = products.filter((p) => cart.includes(p.id));
   const subtotal = cartProducts.reduce((a, p) => a + p.price, 0);
@@ -506,10 +513,16 @@ export default function Storefront() {
                         {p.oldPrice && <del>{formatINR(p.oldPrice)}</del>}
                         <span>one-time</span>
                       </div>
-                    <button className={'add-button ' + (cart.includes(p.id) ? 'in-cart' : '')} aria-label={cart.includes(p.id) ? 'View cart' : `Add ${p.name} to cart`} onClick={() => addToCart(p)}>
-                      {cart.includes(p.id) ? <Check size={15} /> : <Plus size={16} />}
-                    </button>
-                  </div>
+                      {outOfStock(p) ? (
+                        <span className="oos-badge">
+                          <PackageX size={12} /> Out of stock
+                        </span>
+                      ) : (
+                        <button className={'add-button ' + (cart.includes(p.id) ? 'in-cart' : '')} aria-label={cart.includes(p.id) ? 'View cart' : `Add ${p.name} to cart`} onClick={() => addToCart(p)}>
+                          {cart.includes(p.id) ? <Check size={15} /> : <Plus size={16} />}
+                        </button>
+                      )}
+                    </div>
                 </div>
                 </Tilt>
               ))}

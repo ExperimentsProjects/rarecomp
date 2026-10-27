@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ArrowUpRight, Box, Check, CheckCircle2, ChevronRight, Code2, Database, Download, EyeOff, ImagePlus, IndianRupee, Layers, LayoutDashboard, Loader2, LogIn, LogOut, Mail, Package, Pencil, Plus, RefreshCw, Search, Settings as SettingsIcon, ShieldCheck, ShoppingBag, Star, Tag, Trash2, Truck, UserPlus, Users, X } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Box, Check, CheckCircle2, ChevronRight, Code2, Database, Download, EyeOff, ImagePlus, IndianRupee, Layers, LayoutDashboard, Loader2, LogIn, LogOut, Mail, Package, PackageX, Pencil, Plus, RefreshCw, Search, Settings as SettingsIcon, ShieldCheck, ShoppingBag, Star, Tag, Trash2, Truck, UserPlus, Users, X } from 'lucide-react';
 import type { Product, Order, Review, Section } from '@/db/schema';
 import { formatINR } from '@/lib/money';
 import { Brand, ProductVisual } from './visuals';
@@ -17,7 +17,7 @@ type AdminUser = { id: string; name: string; email: string; createdAt: string; l
 type AdminActivity = { email: string; action: string; createdAt: string };
 type MongoStatus = { configured: boolean; connected: boolean; source: 'uri' | 'split' | 'none'; host: string; database: string; message: string };
 
-const blank = { id: '', name: '', description: '', category: 'UI Components', sectionId: '', price: '999', oldPrice: '', image: '', preview: 'dashboard', tags: 'React, Tailwind CSS', specs: 'Delivery: Instant download', badge: '', featured: false, active: true, source: '' };
+const blank = { id: '', name: '', description: '', category: 'UI Components', sectionId: '', price: '999', oldPrice: '', image: '', preview: 'dashboard', tags: 'React, Tailwind CSS', specs: 'Delivery: Instant download', badge: '', featured: false, active: true, stock: '10', inStock: true, source: '' };
 
 export default function AdminPanel() {
   const [admin, setAdmin] = useState<{ id: string; name: string; email: string } | null>(null);
@@ -224,6 +224,8 @@ export default function AdminPanel() {
             badge: p.badge || '',
             featured: p.featured,
             active: p.active,
+            stock: String(p.stock ?? 0),
+            inStock: p.inStock !== false,
             source: p.source || '',
           }
         : { ...blank, sectionId: sections[0]?.id || '' },
@@ -306,6 +308,7 @@ export default function AdminPanel() {
     }
   };
 
+  const [stockDraft, setStockDraft] = useState<Record<string, string>>({});
   const [sourceManager, setSourceManager] = useState<ProductView | null>(null);
   const [sourceText, setSourceText] = useState('');
   const [sourceDirty, setSourceDirty] = useState(false);
@@ -391,6 +394,85 @@ export default function AdminPanel() {
       await loadData();
     } catch (e) {
       setFormError(e instanceof Error ? e.message : 'Could not remove the source code.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /** Mark a component in stock / out of stock (or set an exact quantity). */
+  const toggleStock = async (p: ProductView) => {
+    setBusy(true);
+    setError('');
+    try {
+      const next = p.inStock === false;
+      const r = await fetch('/api/admin/products/stock', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: p.id, inStock: next, stock: next ? Math.max(p.stock ?? 0, 1) : 0 }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw Error(data.error || 'Could not update stock.');
+      setNotice(next ? `${p.name} is back in stock.` : `${p.name} marked out of stock.`);
+      await loadData();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not update stock.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /** Save an exact stock quantity from the inline table field. */
+  const saveStock = async (p: ProductView) => {
+    const raw = (stockDraft[p.id] ?? '').trim();
+    if (raw === '') return;
+    const n = Number(raw);
+    if (!Number.isFinite(n) || n < 0) {
+      setError('Stock must be zero or a positive number.');
+      return;
+    }
+    setBusy(true);
+    setError('');
+    try {
+      const r = await fetch('/api/admin/products/stock', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: p.id, stock: Math.floor(n) }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw Error(data.error || 'Could not update stock.');
+      setStockDraft((d) => {
+        const next = { ...d };
+        delete next[p.id];
+        return next;
+      });
+      setNotice(`Stock updated for ${p.name}.`);
+      await loadData();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not update stock.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const [removeUser, setRemoveUser] = useState<AdminUser | null>(null);
+
+  const confirmRemoveUser = async () => {
+    if (!removeUser) return;
+    setBusy(true);
+    setError('');
+    try {
+      const r = await fetch('/api/admin/users/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: removeUser.id, email: removeUser.email }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw Error(data.error || 'Could not remove this user.');
+      setRemoveUser(null);
+      setNotice(`${removeUser.email} and their account data were removed.`);
+      await loadData();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not remove this user.');
     } finally {
       setBusy(false);
     }
@@ -922,6 +1004,7 @@ export default function AdminPanel() {
                       <th>Component</th>
                       <th>Section</th>
                       <th>Price (₹)</th>
+                      <th>Stock</th>
                       <th>Rating</th>
                       <th>Status</th>
                       <th>Actions</th>
@@ -949,6 +1032,31 @@ export default function AdminPanel() {
                           {p.oldPrice && <del>{formatINR(p.oldPrice)}</del>}
                         </td>
                         <td>
+                          <div className="stock-cell">
+                            <input
+                              type="number"
+                              min="0"
+                              max="1000000"
+                              aria-label={`Stock quantity for ${p.name}`}
+                              value={stockDraft[p.id] ?? String(p.stock ?? 0)}
+                              onChange={(e) => setStockDraft((d) => ({ ...d, [p.id]: e.target.value }))}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  void saveStock(p);
+                                }
+                              }}
+                              onBlur={() => {
+                                if (stockDraft[p.id] !== undefined && stockDraft[p.id] !== String(p.stock ?? 0)) void saveStock(p);
+                              }}
+                              disabled={busy}
+                            />
+                            <span className={'stock-pill ' + (p.inStock === false || (p.stock ?? 0) <= 0 ? 'out' : 'in')}>
+                              {p.inStock === false || (p.stock ?? 0) <= 0 ? 'Out of stock' : `${p.stock ?? 0} in stock`}
+                            </span>
+                          </div>
+                        </td>
+                        <td>
                           {p.ratingCount ? (
                             <span className="rating-cell">
                               <Star size={12} fill="currentColor" /> {p.ratingAvg!.toFixed(1)} <small>({p.ratingCount})</small>
@@ -962,17 +1070,27 @@ export default function AdminPanel() {
                         </td>
                         <td>
                           <div className="table-actions">
-                            <button className="icon-button" aria-label={`Edit ${p.name}`} title="Edit details" onClick={() => editProduct(p)}>
-                              <Pencil size={15} />
+                            <button className="action-btn" aria-label={`Edit ${p.name}`} onClick={() => editProduct(p)}>
+                              <Pencil size={12} /> Edit
                             </button>
-                            <button className="icon-button" aria-label={`Manage source code for ${p.name}`} title="Manage source code" onClick={() => openSourceManager(p)}>
-                              <Code2 size={15} />
+                            <button className="action-btn" aria-label={`Manage source code for ${p.name}`} onClick={() => openSourceManager(p)}>
+                              <Code2 size={12} /> Source
                             </button>
-                            <a className="icon-button" href={'/api/download/' + p.id} aria-label="Download source" title="Download source file">
-                              <Download size={15} />
+                            <button
+                              className="action-btn"
+                              aria-label={`Set ${p.name} out of stock`}
+                              title={p.inStock === false ? 'Mark back in stock' : 'Mark out of stock'}
+                              onClick={() => toggleStock(p)}
+                              disabled={busy}
+                            >
+                              {p.inStock === false ? <CheckCircle2 size={12} /> : <PackageX size={12} />}
+                              {p.inStock === false ? 'In stock' : 'Out of stock'}
+                            </button>
+                            <a className="action-btn" href={'/api/download/' + p.id} aria-label="Download source file">
+                              <Download size={12} /> Get
                             </a>
-                            <button className="icon-button danger-hover" aria-label={`Delete ${p.name}`} title="Unpublish or delete" onClick={() => setArchive(p)}>
-                              <Trash2 size={15} />
+                            <button className="action-btn action-btn-danger" aria-label={`Delete ${p.name}`} onClick={() => setArchive(p)}>
+                              <Trash2 size={12} /> Delete
                             </button>
                           </div>
                         </td>
@@ -1202,9 +1320,14 @@ export default function AdminPanel() {
                               <b>{u.totalSpentPaise ? formatINR(u.totalSpentPaise) : '—'}</b>
                             </td>
                             <td>
-                              <button className="text-link danger-text" onClick={() => forceSignOut(u.id)}>
-                                <LogOut size={12} /> Sign out
-                              </button>
+                              <div className="user-row-actions">
+                                <button className="text-link" onClick={() => forceSignOut(u.id)}>
+                                  <LogOut size={12} /> Sign out
+                                </button>
+                                <button className="text-link danger-text" onClick={() => setRemoveUser(u)}>
+                                  <Trash2 size={12} /> Remove
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -1547,6 +1670,28 @@ export default function AdminPanel() {
                     </select>
                   </label>
                   <label>
+                    Stock quantity
+                    <input
+                      type="number"
+                      min="0"
+                      max="1000000"
+                      value={draft.stock}
+                      onChange={(e) => setDraft({ ...draft, stock: e.target.value })}
+                    />
+                    <small>How many units you have. Set 0 to mark out of stock.</small>
+                  </label>
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={draft.inStock}
+                      onChange={(e) => setDraft({ ...draft, inStock: e.target.checked })}
+                    />
+                    <span>
+                      <b>Available to buy</b>
+                      <small>Uncheck to show “Out of stock” and prevent checkout.</small>
+                    </span>
+                  </label>
+                  <label>
                     Starter layout / preview
                     <select value={draft.preview} onChange={(e) => setDraft({ ...draft, preview: e.target.value })}>
                       {[
@@ -1681,6 +1826,27 @@ export default function AdminPanel() {
                 {busy ? <Loader2 size={15} className="spin" /> : <Truck size={15} />} Update shipping
               </button>
             </div>
+          </div>
+        </Modal>
+      )}
+
+      {removeUser && (
+        <Modal title="Remove this customer account?" onClose={() => setRemoveUser(null)}>
+          <p className="modal-intro">
+            <b>{removeUser.name}</b> ({removeUser.email}) will be permanently removed. Their saved addresses, reviews and sessions are deleted, and their past orders stay on record for accounting but are no longer linked to the account.
+          </p>
+          {removeUser.totalSpentPaise > 0 && (
+            <p className="form-error">
+              This customer has spent {formatINR(removeUser.totalSpentPaise)} with your store. Their order history will be kept for your records, but the account itself cannot be recovered.
+            </p>
+          )}
+          <div className="modal-footer">
+            <button className="button button-secondary" onClick={() => setRemoveUser(null)}>
+              Keep account
+            </button>
+            <button className="button button-danger" onClick={confirmRemoveUser} disabled={busy}>
+              {busy ? <Loader2 size={14} className="spin" /> : <Trash2 size={14} />} Remove permanently
+            </button>
           </div>
         </Modal>
       )}

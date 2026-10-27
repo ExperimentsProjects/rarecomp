@@ -27,6 +27,8 @@ type Seed = {
   specs: { name: string; value: string }[];
   badge: string | null;
   featured: boolean;
+  stock: number;
+  inStock: boolean;
 };
 
 const initial: Seed[] = [
@@ -45,6 +47,8 @@ const initial: Seed[] = [
     tags: ['ESP32-S3', 'TinyML AI', '2.8" Screen', '2MP Camera'],
     badge: 'BESTSELLER',
     featured: true,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Processor', value: 'ESP32-S3 Xtensa LX7 dual-core @ 240 MHz' },
       { name: 'Display', value: '2.8-inch Color TFT LCD (240 × 320 resolution)' },
@@ -71,6 +75,8 @@ const initial: Seed[] = [
     tags: ['Sub-GHz', 'CC1101', 'RF Analyzer', 'Handheld'],
     badge: 'NEW',
     featured: true,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Core Controller', value: 'ESP32-S3 @ 240 MHz (8 MB PSRAM / 16 MB Flash)' },
       { name: 'RF Transceiver', value: 'TI CC1101 (300–348 MHz, 387–464 MHz, 779–928 MHz)' },
@@ -95,6 +101,8 @@ const initial: Seed[] = [
     tags: ['IoT Energy', '100A Clamp', 'OLED', 'ESP32'],
     badge: 'POPULAR',
     featured: true,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Voltage Range', value: 'AC 90–260 V (50/60 Hz True-RMS)' },
       { name: 'Current Range', value: '0.05 A to 100 A via non-invasive CT clamp' },
@@ -120,6 +128,8 @@ const initial: Seed[] = [
     tags: ['C++ Source', 'CC1101', 'ESP32', 'Instant Download'],
     badge: 'BESTSELLER',
     featured: true,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Language', value: 'C++ (C++17 standard) / Arduino Framework' },
       { name: 'Hardware Target', value: 'ESP32 / ESP32-S3 + TI CC1101 + ST7735 / ILI9341 LCD' },
@@ -142,6 +152,8 @@ const initial: Seed[] = [
     tags: ['Drone Firmware', 'FreeRTOS', 'PID Control', 'Instant Download'],
     badge: 'NEW',
     featured: true,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Language', value: 'C++ with FreeRTOS multi-core task pinning' },
       { name: 'Loop Rate', value: '500 Hz PID control loop (< 2 ms latency)' },
@@ -165,6 +177,8 @@ const initial: Seed[] = [
     tags: ['Next.js App', 'MQTT Broker', 'ESP32 Firmware', 'Instant Download'],
     badge: 'POPULAR',
     featured: true,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Web Stack', value: 'Next.js (App Router), TypeScript, Tailwind CSS, WebSockets' },
       { name: 'Firmware Stack', value: 'C++ Arduino / ESP-IDF for ESP32 & ESP8266' },
@@ -187,6 +201,8 @@ const initial: Seed[] = [
     tags: ['LoRa Mesh', 'AES-128', 'P2P Library', 'Instant Download'],
     badge: null,
     featured: false,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Language', value: 'C++ Library (Arduino & ESP-IDF compatible)' },
       { name: 'Supported Radios', value: 'SX1276, SX1278 (RA-02), SX1262, E22 series' },
@@ -212,6 +228,8 @@ const initial: Seed[] = [
     tags: ['ESP32', 'Wi-Fi + BT', 'IoT'],
     badge: 'BESTSELLER',
     featured: true,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'MCU', value: 'ESP32-D0WDQ6 · dual-core Xtensa LX6 @ 240 MHz' },
       { name: 'Memory', value: '520 KB SRAM · 4 MB Flash' },
@@ -238,6 +256,8 @@ const initial: Seed[] = [
     tags: ['ESP32-S3', 'Edge AI', 'TinyML'],
     badge: 'NEW',
     featured: true,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'MCU', value: 'ESP32-S3 · dual-core Xtensa LX7 @ 240 MHz' },
       { name: 'Memory', value: '512 KB SRAM · 16 MB Flash · 8 MB Octal PSRAM' },
@@ -263,6 +283,8 @@ const initial: Seed[] = [
     tags: ['ESP8266', 'Wi-Fi', 'Budget IoT'],
     badge: null,
     featured: false,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'MCU', value: 'ESP8266EX (ESP-12E) · single core @ 80/160 MHz' },
       { name: 'Memory', value: '80 KB RAM · 4 MB Flash' },
@@ -286,6 +308,8 @@ const initial: Seed[] = [
     tags: ['ATmega328P', '5V', 'Beginner'],
     badge: null,
     featured: false,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'MCU', value: 'ATmega328P @ 16 MHz' },
       { name: 'Memory', value: '32 KB Flash · 2 KB SRAM · 1 KB EEPROM' },
@@ -311,6 +335,8 @@ const initial: Seed[] = [
     tags: ['CC1101', '433 MHz', 'Sub-1GHz'],
     badge: 'POPULAR',
     featured: true,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Chip', value: 'Texas Instruments CC1101' },
       { name: 'Frequency', value: '387–464 MHz (tuned to 433 MHz)' },
@@ -338,6 +364,8 @@ const initial: Seed[] = [
     tags: ['nRF24L01+', '2.4 GHz', 'SPI'],
     badge: 'BESTSELLER',
     featured: true,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Chip', value: 'Nordic nRF24L01+' },
       { name: 'Frequency', value: '2.400 – 2.525 GHz · 125 channels' },
@@ -365,6 +393,8 @@ const initial: Seed[] = [
     tags: ['nRF24L01+', 'PA + LNA', '1 km'],
     badge: 'POPULAR',
     featured: true,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Chip', value: 'Nordic nRF24L01+ with PA + LNA front end' },
       { name: 'Frequency', value: '2.400 – 2.525 GHz · 125 channels' },
@@ -391,6 +421,8 @@ const initial: Seed[] = [
     tags: ['EByte', '500 mW', 'Long range'],
     badge: 'NEW',
     featured: true,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Core', value: 'Si24R1 · nRF24L01+ compatible (register level)' },
       { name: 'Frequency', value: '2.400 – 2.525 GHz' },
@@ -418,6 +450,8 @@ const initial: Seed[] = [
     tags: ['LoRa', 'SX1278', '10 km'],
     badge: 'BESTSELLER',
     featured: true,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Chip', value: 'Semtech SX1278' },
       { name: 'Frequency', value: '410 – 525 MHz (tuned to 433 MHz)' },
@@ -445,6 +479,8 @@ const initial: Seed[] = [
     tags: ['HC-12', 'UART', '433 MHz'],
     badge: null,
     featured: false,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Frequency', value: '433.4 – 473.0 MHz' },
       { name: 'Interface', value: 'UART / serial (no radio code needed)' },
@@ -470,6 +506,8 @@ const initial: Seed[] = [
     tags: ['2.4 GHz', 'SMA', '5 dBi'],
     badge: null,
     featured: false,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Frequency', value: '2400 – 2500 MHz' },
       { name: 'Gain', value: '5 dBi omnidirectional' },
@@ -493,6 +531,8 @@ const initial: Seed[] = [
     tags: ['433 MHz', 'Helical', 'Pack of 5'],
     badge: null,
     featured: false,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Frequency', value: '433 MHz' },
       { name: 'Type', value: 'Helical spring · omnidirectional' },
@@ -518,6 +558,8 @@ const initial: Seed[] = [
     tags: ['ESP32', 'nRF24L01+', '1 km'],
     badge: 'BESTSELLER',
     featured: true,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Includes', value: '2× ESP32 DevKit · 2× nRF24L01+ PA+LNA · 2× adapter · 2× antenna · jumpers' },
       { name: 'Range', value: 'up to ≈1000 m line of sight' },
@@ -541,6 +583,8 @@ const initial: Seed[] = [
     tags: ['LoRa', 'SX1278', 'Multi-km'],
     badge: 'NEW',
     featured: true,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Includes', value: '2× SX1278 433 MHz · 2× spring antenna · breadboard · jumpers' },
       { name: 'Range', value: '2 – 10 km line of sight' },
@@ -566,6 +610,8 @@ const initial: Seed[] = [
     tags: ['ESP32-S3', 'Bare module', 'PCB design'],
     badge: null,
     featured: false,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Module', value: 'ESP32-S3-WROOM-1 · N8R2' },
       { name: 'Memory', value: '8 MB Flash · 2 MB PSRAM' },
@@ -589,6 +635,8 @@ const initial: Seed[] = [
     tags: ['CC1101', '868 MHz', 'Rare'],
     badge: 'RARE',
     featured: false,
+    stock: 25,
+    inStock: true,
     specs: [
       { name: 'Chip', value: 'Texas Instruments CC1101' },
       { name: 'Frequency', value: '779 – 928 MHz (tuned to 868 MHz)' },

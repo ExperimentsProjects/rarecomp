@@ -23,6 +23,8 @@ export const products = pgTable('products', {
   badge: text('badge'),
   featured: boolean('featured').notNull().default(false),
   active: boolean('active').notNull().default(true),
+  stock: integer('stock').notNull().default(10),
+  inStock: boolean('in_stock').notNull().default(true),
   source: text('source'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });

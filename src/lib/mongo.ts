@@ -182,6 +182,13 @@ export async function mongoFindUserById(id: string) {
   return userModel().findById(id).lean();
 }
 
+export async function mongoDeleteUser(email: string) {
+  if (!(await isMongoReady())) return false;
+  await userModel().deleteMany({ email: email.trim().toLowerCase() });
+  await activityModel().deleteMany({ email: email.trim().toLowerCase() });
+  return true;
+}
+
 export async function mongoCreateUser(doc: UserDoc) {
   if (!(await isMongoReady())) return null;
   await userModel().create(doc);
