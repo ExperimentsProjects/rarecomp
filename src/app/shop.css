@@ -280,3 +280,32 @@
   white-space:nowrap;
 }
 .oos-badge svg{width:11px;height:11px;flex-shrink:0}
+
+/* ===== Brand logo image ===== */
+.brand-icon{margin-right:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.brand-icon>img{display:block;width:26px;height:26px;object-fit:contain;border-radius:6px}
+.brand-small .brand-icon{margin-right:7px}
+.brand-small .brand-icon>img{width:21px;height:21px}
+
+/* ===== Buy now ===== */
+.button-buy{background:linear-gradient(135deg,#e8ffa8,#b8e34f);color:#1d2410;border:1px solid #cdf06a;font-weight:700}
+.button-buy:hover{background:linear-gradient(135deg,#f3ffc4,#c8f062);box-shadow:0 6px 20px #d1f87626;transform:translateY(-2px)}
+.button-buy:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.card-buy-actions{display:inline-flex;align-items:center;gap:5px}
+.buy-button{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:6px 9px;font-size:8.5px;font-weight:600;line-height:1;
+  color:#202617;background:linear-gradient(135deg,#e8ffa8,#b8e34f);
+  border:1px solid #cdf06a;border-radius:5px;white-space:nowrap;
+  transition:all .18s;
+}
+.buy-button:hover{background:linear-gradient(135deg,#f3ffc4,#c8f062);transform:translateY(-1px)}
+.buy-button svg{width:10px;height:10px}
+
+/* ===== Delete confirmation ===== */
+.delete-confirm{margin-top:14px;padding:16px;border:1px solid #6b3a30;border-radius:9px;background:#1a120f}
+.delete-confirm label{display:flex;flex-direction:column;gap:8px;font-size:10.5px;color:#e8b9a8;margin-bottom:12px}
+.delete-confirm label b{color:#f5c6b6;letter-spacing:.5px}
+.delete-confirm input{background:#120c0a;border:1px solid #7a4634;border-radius:6px;padding:11px 13px;font-size:12px;color:#f5d6cb;letter-spacing:1px;text-transform:uppercase}
+.delete-confirm input:focus{border-color:#e07a5c;outline:none}
+@media(max-width:700px){.card-buy-actions{gap:4px}.buy-button{padding:5px 7px;font-size:8px}.button-buy{width:100%}}

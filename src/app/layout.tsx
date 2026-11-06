@@ -22,7 +22,8 @@ export const metadata: Metadata = {
   keywords: ['ESP32', 'ESP32-S3', 'CC1101', 'nRF24L01', 'LoRa', 'electronics', 'India', 'IoT', 'components store'],
   icons: {
     icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
-    apple: [{ url: '/apple-icon.png', type: 'image/png', sizes: '180x180' }],
+    apple: [{ url: '/apple-icon.svg', type: 'image/svg+xml' }],
+    shortcut: ['/logo.svg'],
   },
   openGraph: {
     type: 'website',

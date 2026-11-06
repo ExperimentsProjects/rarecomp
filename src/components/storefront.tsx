@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, ArrowUpRight, Search, ShoppingBag, MapPin, PackageX, ChevronDown, Check, Heart, X, SlidersHorizontal, Grid2X2, Box, Sparkles, Code2, ShieldCheck, Download, ExternalLink, Plus, Menu, UserRound, Star, CheckCircle2, Loader2, Trash2, Copy, Mail, Phone, RefreshCw, Package, Truck } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Search, ShoppingBag, MapPin, PackageX, Zap, ChevronDown, Check, Heart, X, SlidersHorizontal, Grid2X2, Box, Sparkles, Code2, ShieldCheck, Download, ExternalLink, Plus, Menu, UserRound, Star, CheckCircle2, Loader2, Trash2, Copy, Mail, Phone, RefreshCw, Package, Truck } from 'lucide-react';
 import type { Product, Order, Review, Section } from '@/db/schema';
 import type { StoreSettings } from '@/lib/settings';
 import { formatINR, isDigital } from '@/lib/money';
@@ -132,6 +132,17 @@ export default function Storefront() {
     updateCart([...cart, p.id]);
     notify(p.name.split(' — ')[0] + ' added to your cart');
   };
+  /** Skip the cart — open checkout for this single item straight away. */
+  const buyNow = (p: ProductView) => {
+    if (outOfStock(p)) {
+      notify('Sorry — this component is out of stock right now.');
+      return;
+    }
+    updateCart([p.id]);
+    setSelected(null);
+    setDialog('checkout');
+  };
+
   const toggleSaved = (id: string) => {
     const next = saved.includes(id) ? saved.filter((x) => x !== id) : [...saved, id];
     setSaved(next);
@@ -518,9 +529,14 @@ export default function Storefront() {
                           <PackageX size={12} /> Out of stock
                         </span>
                       ) : (
-                        <button className={'add-button ' + (cart.includes(p.id) ? 'in-cart' : '')} aria-label={cart.includes(p.id) ? 'View cart' : `Add ${p.name} to cart`} onClick={() => addToCart(p)}>
-                          {cart.includes(p.id) ? <Check size={15} /> : <Plus size={16} />}
-                        </button>
+                        <span className="card-buy-actions">
+                          <button className={'add-button ' + (cart.includes(p.id) ? 'in-cart' : '')} aria-label={cart.includes(p.id) ? 'View cart' : `Add ${p.name} to cart`} onClick={() => addToCart(p)}>
+                            {cart.includes(p.id) ? <Check size={15} /> : <Plus size={16} />}
+                          </button>
+                          <button className="buy-button" aria-label={`Buy ${p.name} now`} title="Buy now" onClick={() => buyNow(p)}>
+                            <Zap size={12} /> Buy
+                          </button>
+                        </span>
                       )}
                     </div>
                 </div>
@@ -758,6 +774,9 @@ export default function Storefront() {
                 <div className="detail-actions">
                   <button className="button button-lime" onClick={() => addToCart(selected)}>
                     {cart.includes(selected.id) ? 'View in cart' : 'Add to cart'} <ShoppingBag size={16} />
+                  </button>
+                  <button className="button button-buy" onClick={() => buyNow(selected)} disabled={outOfStock(selected)}>
+                    Buy now <Zap size={15} />
                   </button>
                   <button className="button button-secondary" onClick={() => setPreview(true)}>
                     Live preview <ExternalLink size={15} />

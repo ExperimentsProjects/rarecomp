@@ -455,6 +455,8 @@ export default function AdminPanel() {
   };
 
   const [removeUser, setRemoveUser] = useState<AdminUser | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   const confirmRemoveUser = async () => {
     if (!removeUser) return;
@@ -1089,7 +1091,7 @@ export default function AdminPanel() {
                             <a className="action-btn" href={'/api/download/' + p.id} aria-label="Download source file">
                               <Download size={12} /> Get
                             </a>
-                            <button className="action-btn action-btn-danger" aria-label={`Delete ${p.name}`} onClick={() => setArchive(p)}>
+                            <button className="action-btn action-btn-danger" aria-label={`Delete ${p.name}`} onClick={() => { setDeleteConfirm(false); setDeleteConfirmText(''); setArchive(p); }}>
                               <Trash2 size={12} /> Delete
                             </button>
                           </div>
@@ -1903,18 +1905,39 @@ export default function AdminPanel() {
             <button className="delete-option" onClick={() => archiveProduct(false)} disabled={busy}>
               <EyeOff size={17} />
               <span>
-                <b>Unpublish (recommended)</b>
-                <small>Hides it from the storefront but keeps the record, source code and customer downloads intact. You can publish it again anytime.</small>
+                <b>Hide from storefront (keep the record)</b>
+                <small>The component disappears from the shop and can no longer be bought, but it stays in your admin list with its source code. Existing customers keep their downloads. You can bring it back any time.</small>
               </span>
             </button>
-            <button className="delete-option delete-option-danger" onClick={() => archiveProduct(true)} disabled={busy}>
+            <button className="delete-option delete-option-danger" onClick={() => setDeleteConfirm(true)} disabled={busy}>
               <Trash2 size={17} />
               <span>
-                <b>Delete permanently</b>
-                <small>Permanently erases the component, its downloadable source code and its reviews. This cannot be undone.</small>
+                <b>Delete completely — remove from everywhere</b>
+                <small>Removes the component from the storefront, your admin list, its source code and its reviews. It will no longer appear on the home page. This cannot be undone.</small>
               </span>
             </button>
           </div>
+          {deleteConfirm && (
+            <div className="delete-confirm">
+              <label>
+                Type <b>DELETE</b> to confirm permanent removal
+                <input
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder="DELETE"
+                  autoFocus
+                  aria-label="Type DELETE to confirm"
+                />
+              </label>
+              <button
+                className="button button-danger full-width"
+                onClick={() => archiveProduct(true)}
+                disabled={busy || deleteConfirmText.trim().toUpperCase() !== 'DELETE'}
+              >
+                {busy ? <Loader2 size={14} className="spin" /> : <Trash2 size={14} />} Delete permanently from site
+              </button>
+            </div>
+          )}
           <div className="modal-footer">
             <button className="button button-secondary" onClick={() => setArchive(null)}>
               Cancel

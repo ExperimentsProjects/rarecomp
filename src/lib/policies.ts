@@ -1,4 +1,5 @@
 export const POLICY_SLUGS = ['about', 'contact', 'shipping', 'return-policy', 'refund-policy', 'privacy', 'disclaimer', 'terms'] as const;
+export const RETURN_POLICY_SLUGS = POLICY_SLUGS;
 export type PolicySlug = (typeof POLICY_SLUGS)[number];
 
 export const POLICY_TITLES: Record<PolicySlug, string> = {
